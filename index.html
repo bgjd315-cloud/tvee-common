@@ -1,0 +1,896 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>統測國文英文考題分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+/* Layout: 答案卡式的紙面——上方選校，左權重右優先清單，下方各科熱度表與題目 */
+:root {
+  --paper: #fbf8f6;
+  --surface: #ffffff;
+  --ink: #1e2433;
+  --muted: #5d6472;
+  --rule: #e8dcd8;
+  --card-red: #be3b34;
+  --card-red-soft: #f6e3e0;
+  --graphite: #343a46;
+  --on-graphite: #ffffff;
+  --up: #2f7d5b;
+  --down: #b5472f;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15171c; --surface: #1c1f26; --ink: #ece8e4; --muted: #a3a8b1; --rule: #30333b;
+    --card-red: #e46a5f; --card-red-soft: #3a2422; --graphite: #cfd3da; --on-graphite: #15171c;
+    --up: #5fbf92; --down: #ec8a72; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15171c; --surface: #1c1f26; --ink: #ece8e4; --muted: #a3a8b1; --rule: #30333b;
+  --card-red: #e46a5f; --card-red-soft: #3a2422; --graphite: #cfd3da; --on-graphite: #15171c;
+  --up: #5fbf92; --down: #ec8a72; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 900; letter-spacing: .02em; }
+h2 { font-size: 20px; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 12px; letter-spacing: .14em; color: var(--card-red); font-weight: 700; }
+
+header { display: grid; gap: 8px; border-bottom: 2px solid var(--card-red); padding-bottom: 16px; }
+header p { margin: 0; max-width: 68ch; }
+
+/* 答案卡式的區段標頭 */
+.sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--card-red); padding-bottom: 6px; margin-bottom: 14px; }
+.sec-head .tag { font-family: var(--font-mono); font-size: 12px; color: var(--card-red); border: 1px solid var(--card-red); padding: 0 6px; border-radius: 3px; }
+
+.controls { display: grid; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row > .label { font-size: 13px; color: var(--muted); min-width: 4.5em; }
+.chip { font: inherit; font-size: 14px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--card-red); border-color: var(--card-red); color: #fff; }
+.chip:focus-visible, button:focus-visible, .hm tr:focus-visible, input:focus-visible { outline: 2px solid var(--card-red); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--card-red); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--card-red); padding: 5px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card-red); color: #fff; }
+
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); gap: 28px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* 權重條 */
+.wbars { display: grid; gap: 10px; }
+.wbar { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 3.6em; gap: 10px; align-items: center; font-size: 14px; }
+.wbar .track { height: 14px; background: var(--card-red-soft); border-radius: 2px; position: relative; overflow: hidden; }
+.wbar .fill { position: absolute; inset: 0 auto 0 0; background: var(--card-red); border-radius: 2px; }
+.wbar .num { text-align: right; }
+.wbar.zero { color: var(--muted); }
+.school-notes { margin-top: 18px; display: grid; gap: 10px; font-size: 13.5px; }
+.school-notes .sn { border-left: 3px solid var(--rule); padding-left: 10px; }
+.school-notes b { font-weight: 700; }
+
+/* 優先清單 */
+table { border-collapse: collapse; width: 100%; }
+.prio th, .prio td { padding: 7px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; font-size: 14px; }
+.prio th { font-size: 12px; color: var(--muted); font-weight: 500; }
+.prio td.num, .prio th.num { text-align: right; }
+.subj { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 3px; border: 1px solid var(--rule); white-space: nowrap; }
+.rank { font-family: var(--font-mono); color: var(--card-red); font-weight: 600; }
+.share { display: grid; grid-template-columns: minmax(40px, 1fr) 3.4em; gap: 8px; align-items: center; }
+.share .bar { height: 8px; background: var(--graphite); border-radius: 1px; }
+.trend { font-family: var(--font-mono); font-size: 13px; white-space: nowrap; }
+.trend.up { color: var(--up); } .trend.down { color: var(--down); } .trend.flat { color: var(--muted); }
+.linkbtn { font: inherit; font-size: 13px; background: none; border: 0; color: var(--card-red); cursor: pointer; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; }
+.prio tr.clickable { cursor: pointer; }
+.prio tr.clickable:hover td { background: var(--card-red-soft); }
+
+/* 熱度表 */
+.scroll { overflow-x: auto; }
+.hm { min-width: 640px; }
+.hm th, .hm td { padding: 0; font-size: 13.5px; }
+.hm thead th { font-family: var(--font-mono); color: var(--card-red); font-weight: 600; padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--card-red); }
+.hm thead th:first-child { text-align: left; font-family: var(--font-body); color: var(--muted); font-weight: 500; }
+.hm tbody tr { cursor: pointer; }
+.hm tbody tr:hover .cname, .hm tbody tr[aria-selected="true"] .cname { color: var(--card-red); }
+.hm tbody tr[aria-selected="true"] td { background: var(--card-red-soft); }
+.hm .cname { padding: 5px 10px 5px 0; white-space: nowrap; }
+.hm .cell { width: 62px; text-align: center; padding: 3px; }
+.hm .cell span { display: block; border-radius: 4px; padding: 4px 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.hm .avg, .hm .tr { width: 76px; text-align: right; padding-right: 8px; font-family: var(--font-mono); }
+.legend { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.legend i { width: 22px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid var(--rule); }
+
+/* 題目列表 */
+.qpanel { margin-top: 18px; display: grid; gap: 10px; }
+.qhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.qhead input { font: inherit; font-size: 14px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); width: min(260px, 100%); }
+.qlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.qlist li { border-bottom: 1px dashed var(--rule); font-size: 14px; }
+.qlist li.empty { padding: 8px 0; }
+.qlist summary { display: grid; grid-template-columns: 6.5em auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; cursor: pointer; list-style: none; }
+.qlist summary::-webkit-details-marker { display: none; }
+.qlist summary::after { content: "解析 ▾"; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.qlist details[open] summary::after { content: "收合 ▴"; }
+.qlist summary:focus-visible { outline: 2px solid var(--graphite); outline-offset: 2px; }
+.qbody { display: grid; gap: 10px; padding: 4px 0 16px; }
+.qbody figure { margin: 0; }
+.qbody figcaption { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.qbody img { display: block; width: 100%; max-width: 640px; height: auto; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+.explain { max-width: 70ch; line-height: 1.75; background: var(--surface); border-left: 3px solid var(--graphite); padding: 8px 12px; border-radius: 0 4px 4px 0; }
+.explain b { font-family: var(--font-mono); }
+.qlist .qid { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.bubbles { display: inline-flex; gap: 4px; }
+.bubbles b { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--card-red); color: var(--card-red); font: 600 11px/17px var(--font-mono); text-align: center; }
+.bubbles b.on { background: var(--graphite); border-color: var(--graphite); color: var(--on-graphite); }
+.free { font-size: 12px; color: var(--card-red); border: 1px solid var(--card-red); border-radius: 3px; padding: 0 5px; }
+.stem { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .qlist summary { grid-template-columns: auto minmax(0, 1fr) auto; } .qlist .stem { grid-column: 1 / -1; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .qbody img, :root:not([data-theme="light"]) .pcard img { filter: invert(.9) hue-rotate(180deg); } }
+:root[data-theme="dark"] .qbody img, :root[data-theme="dark"] .pcard img { filter: invert(.9) hue-rotate(180deg); }
+
+[hidden] { display: none !important; }
+.rv { display: inline-block; font-size: 11px; line-height: 1.5; color: var(--card-red); border: 1px solid var(--card-red); border-radius: 3px; padding: 0 4px; margin-left: 6px; white-space: nowrap; vertical-align: 1px; }
+.rvnote { font-size: 13px; color: var(--muted); border-left: 3px solid var(--card-red); padding: 4px 10px; margin: 0; max-width: 70ch; }
+.qfilter { font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+/* 讀書計畫 */
+.pctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 14px; }
+.pctl label { display: inline-flex; gap: 6px; align-items: center; }
+.pctl input, .pctl select { font: inherit; font-size: 14px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.pprog { height: 8px; background: var(--card-red-soft); border-radius: 4px; overflow: hidden; max-width: 520px; }
+.pprog span { display: block; height: 100%; background: var(--card-red); width: 0; }
+.pweeks { display: grid; gap: 6px; }
+.pweek { border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.pweek.cur { border-color: var(--card-red); }
+.pweek summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 8px 12px; cursor: pointer; font-size: 14px; }
+.pweek summary .pcount { margin-left: auto; color: var(--muted); }
+.ptag { font-size: 12px; border-radius: 3px; padding: 0 6px; border: 1px solid var(--rule); color: var(--muted); }
+.ptag.p1 { color: var(--ink); } .ptag.p2 { color: var(--up); border-color: var(--up); } .ptag.p3 { color: var(--card-red); border-color: var(--card-red); }
+.ptag.now { background: var(--card-red); border-color: var(--card-red); color: #fff; }
+.ptasks { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 8px; }
+.ptasks li { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; font-size: 14px; border-top: 1px dashed var(--rule); padding-top: 8px; }
+.ptasks label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; min-width: 0; }
+.ptasks input { margin-top: 4px; accent-color: var(--card-red); }
+.ptasks .muted { font-size: 13px; }
+.ptasks .linkbtn { white-space: nowrap; padding: 0; }
+/* 章節重點筆記 */
+.notes { border: 1px solid var(--rule); border-left: 3px solid var(--card-red); border-radius: 6px; background: var(--surface); margin: 0 0 14px; }
+.notes summary { cursor: pointer; padding: 8px 12px; font-weight: 600; font-size: 14px; }
+.notes .nbody { padding: 0 14px 10px; font-size: 14px; line-height: 1.7; }
+.notes h4 { margin: 8px 0 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.notes ul { margin: 0; padding-left: 20px; }
+.notes li { margin: 2px 0; }
+.notes .trap li::marker { color: var(--card-red); }
+/* 練習模式 */
+.pcard { border: 1px solid var(--rule); background: var(--surface); border-radius: 8px; padding: 16px; display: grid; gap: 12px; }
+.pmeta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; }
+.pmeta .prog { font-family: var(--font-mono); color: var(--card-red); font-weight: 600; }
+.pcard figure { margin: 0; }
+.pcard details summary { cursor: pointer; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.pcard img { display: block; width: 100%; max-width: 680px; height: auto; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+.pchoices { display: flex; gap: 12px; flex-wrap: wrap; }
+.pchoice { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--card-red); background: var(--surface); color: var(--card-red); font: 600 18px var(--font-mono); cursor: pointer; }
+.pchoice:hover:not(:disabled) { background: var(--card-red-soft); }
+.pchoice:disabled { cursor: default; opacity: .55; }
+.pchoice.picked { background: var(--card-red); color: #fff; opacity: 1; }
+.pchoice.correct { background: var(--up); border-color: var(--up); color: #fff; opacity: 1; }
+.pfeed { font-weight: 700; margin: 0; }
+.pfeed.ok { color: var(--up); } .pfeed.bad { color: var(--card-red); }
+.btn { font: inherit; font-size: 14px; border: 1px solid var(--card-red); background: var(--card-red); color: #fff; border-radius: 6px; padding: 7px 16px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--card-red); }
+.btn:disabled { opacity: .45; cursor: default; }
+.pstatus { font-size: 13px; color: var(--muted); margin: 0; }
+.pwrong { margin: 0; padding-left: 1.2em; font-size: 14px; display: grid; gap: 4px; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; display: grid; gap: 6px; }
+.note p { margin: 0; }
+.panel-sub { font-size: 13.5px; color: var(--muted); margin: -6px 0 12px; }
+@media (prefers-reduced-motion: no-preference) { .wbar .fill, .share .bar { transition: width .25s ease; } }
+.wrap > *, .grid2 > * { min-width: 0; }
+.sibling { font-size: 13.5px; margin: 4px 0 0; }
+.sibling a { color: var(--card-red); font-weight: 700; }
+.controls[aria-label="選擇目標校"], .grid2 > section:first-child { display: none; }
+.grid2 { grid-template-columns: minmax(0, 1fr) !important; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">四技二專統測 · 共同科目 · 110–115 學年度</span>
+    <h1>統測國文英文考題分析</h1>
+    <p class="muted">依技專校院入學測驗中心公告的 110–115 學年度四技二專統測共同科目試題（國文、英文選擇題共 479 題，各群類共用），整理各題型的出題趨勢、逐題截圖與解析，排出準備優先順序。</p>
+    <p class="sibling">也有二技版：<a href="https://bgjd315-cloud.github.io/tvee-common/erji/">二技國文英文考題分析 →</a></p>
+  </header>
+
+  <section class="controls" aria-label="選擇目標校">
+    <div class="row"><span class="label">目標校</span><div class="row" id="schools"></div></div>
+    <div class="row"><span class="label">入學管道</span>
+      <div class="seg" role="group" aria-label="入學管道">
+        <button type="button" id="mode-apply" data-mode="apply">甄選入學</button>
+        <button type="button" id="mode-dist" data-mode="dist">登記分發</button>
+      </div>
+      <span class="muted" style="font-size:13px" id="mode-hint"></span>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <div class="sec-head"><h2>各科占總成績</h2><span class="tag">權重</span></div>
+      <p class="panel-sub" id="weight-sub"></p>
+      <div class="wbars" id="wbars"></div>
+      <div class="school-notes" id="school-notes"></div>
+    </section>
+    <section>
+      <div class="sec-head"><h2>優先準備清單</h2><span class="tag">排序</span></div>
+      <p class="panel-sub">依「六年平均配分 × 近三年趨勢」排序。「占兩科總分」是該題型每年平均配分占國文、英文兩科總分的百分比。點一列可看該章歷屆題目，題目可展開截圖與解析。</p>
+      <div class="tabs" id="prio-filter" role="group" aria-label="清單範圍"></div>
+      <p class="panel-sub" id="prio-warn" hidden></p>
+      <div class="scroll"><table class="prio"><thead><tr><th>#</th><th>考科</th><th>章節／題型</th><th class="num">每年平均</th><th>近三年</th><th>占兩科總分</th></tr></thead><tbody id="prio"></tbody></table></div>
+      <button type="button" class="linkbtn" id="prio-more"></button>
+    </section>
+  </div>
+
+  <section id="explorer">
+    <div class="sec-head"><h2>各科章節熱度</h2><span class="tag">110–115</span></div>
+    <div class="tabs" id="subj-tabs" role="tablist" aria-label="考科"></div>
+    <p class="panel-sub" id="subj-sub"></p>
+    <div class="scroll"><table class="hm"><thead id="hm-head"></thead><tbody id="hm-body"></tbody></table></div>
+    <div class="legend" id="hm-legend"></div>
+    <div class="qpanel" id="qpanel"></div>
+  </section>
+
+  <section id="practice" aria-label="練習模式">
+    <div class="sec-head"><h2>練習模式</h2><span class="tag">作答</span></div>
+    <p class="panel-sub">從歷屆題目隨機出題，作答後立即對答案、看解析。答錯的題目會記進錯題本，之後答對就移出。</p>
+    <div id="p-setup" class="controls">
+      <div class="row"><span class="label">範圍</span><div class="row" id="p-scopes" role="group" aria-label="出題範圍"></div></div>
+      <div class="row"><span class="label">題數</span><div class="row" id="p-counts" role="group" aria-label="題數"></div></div>
+      <p class="pstatus" id="p-scope-hint"></p>
+      <div class="row"><button type="button" class="btn" id="p-start">開始練習</button></div>
+      <p class="pstatus" id="p-status"></p>
+    </div>
+    <div id="p-run" hidden></div>
+  </section>
+
+  <section id="plan" aria-label="讀書計畫">
+    <div class="sec-head"><h2>讀書計畫</h2><span class="tag">週進度</span></div>
+    <p class="panel-sub">依國文、英文各題型的優先分數，排出到統測前的每週進度：先依優先分數分配時數讀章節，再複習錯題，最後計時寫整份歷屆試卷。勾選完成的項目會記住。</p>
+    <div class="controls">
+      <div class="pctl">
+        <label>開始日期 <input type="date" id="plan-start"></label>
+        <label>統測日期 <input type="date" id="plan-exam"></label>
+        <label>每週讀書時數 <select id="plan-hours"><option>6</option><option>8</option><option>10</option><option>12</option><option>15</option><option>20</option></select> 小時</label>
+      </div>
+      <p class="pstatus">統測日期預設為 2027/4/24（預估），請依技專校院入學測驗中心公告調整。</p>
+      <p class="pstatus" id="plan-summary" style="color:var(--ink)"></p>
+      <div class="pprog" aria-hidden="true"><span id="plan-bar"></span></div>
+      <p class="pstatus"><span id="plan-where"></span>　<button type="button" class="linkbtn" id="plan-reset" style="padding:0">清除進度</button></p>
+    </div>
+    <div class="pweeks" id="plan-weeks" style="margin-top:12px"></div>
+  </section>
+
+  <section class="note" aria-label="資料說明">
+    <div class="sec-head" style="margin-bottom:4px"><h2 style="font-size:16px">資料說明</h2></div>
+    <p>試題與公告答案來自技專校院入學測驗中心公告的 110–115 學年度四技二專統一入學測驗共同科目國文、英文試題，所有群類共用同一份試卷。</p>
+    <p>國文依題型分類、英文依試題本標示的大題分類，為 Claude 依題意初標的暫定分類，國文需任課老師覆核。</p>
+    <p>逐題解析由 Claude 撰寫，已逐題比對公告答案，並經過一次全面複查，但推理與說明仍可能有誤，使用前請任課老師覆核。其中 <span id="rv-count"></span> 題標示「建議覆核」，展開後可看到原因。題目截圖取自測驗中心公告的試題本。</p>
+    <p>國文寫作（每年 24 分）與英文非選擇題（110 年 18 分、其後 16 分）不在逐題資料中，以固定配分列入排序。各校對國文、英文的採計倍率不同，本頁以兩科同等權重排序。</p>
+  </section>
+</div>
+
+<script>
+const D = {"chapters":{"國文":{"C01":"字形","C02":"字詞義與虛詞","C03":"詞語填空","C04":"語法、修辭與表達手法","C05":"文句排序","C06":"國學與文學常識","C07":"應用文","C08":"古典文本閱讀","C09":"白話文學閱讀","C10":"知識性與圖表資訊閱讀","C99":"寫作測驗"},"英文":{"E01":"字彙題","E02":"對話題","E03":"綜合測驗","E04":"閱讀測驗","E99":"非選擇題（填充、句子重組、中譯英）"}},"questions":[["110-國文-01",110,"國文",1,"C01","B",2,"下列文句，何者有錯別字？"],["110-國文-02",110,"國文",2,"C02","D",2,"下列文句的「出」，何者與「無出其右」的「出」意義最接近？"],["110-國文-03",110,"國文",3,"C02","B",2,"下列文句「」內的副詞，何者意指範圍層面的完整？"],["110-國文-04",110,"國文",4,"C04","D",2,"下列文句，何者不是從頭至尾皆以畫底線者為主語？"],["110-國文-05",110,"國文",5,"C06","A",2,"如右圖所示，①為三者的交集，②、③、④為兩兩的交集。下列古典名篇的敘述，何者最不適當？"],["110-國文-06",110,"國文",6,"C04","A",2,"「阿國：『你的好位子真讓人羨慕。』小文：『我的職位是肥缺？』阿國：『我是說你的辦公桌採光好。』」在這段對話中，由於「好位"],["110-國文-07",110,"國文",7,"C05","D",2,"若要使下文的理路連貫有序，①、②、③、④、⑤最適當的排列應是：茄苳和臺灣欒樹皆是臺灣常見的行道樹，①樹瘤也奇形怪狀，②還"],["110-國文-08",110,"國文",8,"C06","B",2,"課堂上，有四位同學結合課文談論下圖，其中何者對課文有所誤解？"],["110-國文-09",110,"國文",9,"C03","A",2,"若要將「①只是、②也許、③幾乎、④竟是」填入下文，使全文完整通順，內依序應填入：孫將軍遠遠地帶著微笑走來，諸天並沒有震動"],["110-國文-10",110,"國文",10,"C04","D",2,"關於下文〔〕、< >、“”的敘寫手法分析，何者錯誤？事隔多年再寫張國榮，終究還是覺得特別心虛，特別踟躕惶恐，〔主要因為他"],["110-國文-11",110,"國文",11,"C10","C",2,"依據甲、乙二文，助產婦與先生媽的區別主要為何？"],["110-國文-12",110,"國文",12,"C10","C",2,"下列何者符合甲、乙二文所述？"],["110-國文-13",110,"國文",13,"C08","A",2,"關於上文的藤蘿，下列敘述何者正確？"],["110-國文-14",110,"國文",14,"C08","B",2,"上文為求周減齋惠賜墨寶，採取何種言說策略？"],["110-國文-15",110,"國文",15,"C08","C",2,"依據上文，何者的待人思維最接近劉八？"],["110-國文-16",110,"國文",16,"C08","C",2,"上文藉劉八的下場，最可能想警惕讀者："],["110-國文-17",110,"國文",17,"C08","A",2,"甲、乙二文共同批評的對象是："],["110-國文-18",110,"國文",18,"C08","A",2,"關於甲、乙文中①、②、③三個「於」的用法與意義，正確的研判是："],["110-國文-19",110,"國文",19,"C08","D",2,"關於甲、乙二文的敘寫方式，最適當的解說是："],["110-國文-20",110,"國文",20,"C08","A",2,"關於甲、乙二文的敘述，何者正確？"],["110-國文-21",110,"國文",21,"C08","D",2,"關於乙文、丙詩的敘寫方式，最適當的是："],["110-國文-22",110,"國文",22,"C10","B",2,"依據下表，下列敘述何者錯誤？碳酸氫鹽泉硫酸鹽泉水中陰離子碳酸氫根離子為主硫酸根離子為主主要分布變質岩區火成岩區著名溫泉礁"],["110-國文-23",110,"國文",23,"C10","C",2,"甲文①、②、③、④畫線處的敘述，何者能在乙圖中得到明確印證？①②③④"],["110-國文-24",110,"國文",24,"C10","A",2,"依據甲文，何者不是臺灣毛豆產業脫困的原因？"],["110-國文-25",110,"國文",25,"C10","B",2,"依據甲文，何者最符合「精準農業」的要件？"],["110-國文-26",110,"國文",26,"C10","C",2,"依據甲文，關於白居易租屋購屋的敘述，何者正確？"],["110-國文-27",110,"國文",27,"C10","C",2,"依據上述資料，對於①、②的研判應是：①隨著官位品階上升，白居易租的房子也越來越靠長安繁華地區。②白居易寫〈琵琶行〉時（元"],["110-國文-28",110,"國文",28,"C10","D",2,"若乙文為白居易的租屋契約，依據甲文、丙表，下列敘述何者正確？"],["110-國文-29",110,"國文",29,"C10","B",2,"依據丙表，白居易50歲購屋時，下列哪個房屋物件最符合他當時的身分？"],["110-國文-30",110,"國文",30,"C10","C",2,"依據上文，關於川久保玲襤褸美學的敘述，何者正確？"],["110-國文-31",110,"國文",31,"C10","A",2,"依據上文，何者最接近川久保玲「從零開始」的理念？"],["110-國文-32",110,"國文",32,"C09","A",2,"甲文末尾的□□□□，若上承「忽獨與余兮目成」敘寫，最適當的詞語應是："],["110-國文-33",110,"國文",33,"C09","A",2,"依據乙文的描寫，下列圖示何者正確？"],["110-國文-34",110,"國文",34,"C09","C",2,"依據甲、乙二文，對於①、②的研判應是：①由甲文「詩中巫對神的追求」與乙文「齊聲歌舞迎神」可推知：〈少司命〉詞句會以巫祝口"],["110-國文-35",110,"國文",35,"C09","B",2,"甲、乙二文皆引用「忽獨與余兮目成」，藉古典文學經營美感。關於二文運用此句的解讀，最不適當的是："],["110-國文-36",110,"國文",36,"C10","B",2,"依據上文，關於南安小熊野放的敘述，何者正確？"],["110-國文-37",110,"國文",37,"C10","A",2,"依據上文，對於①、②的研判應是：①從文中「四個月大」與「280天」可知：黑熊野放已就表中「年齡」因素做有利考量。②從文中"],["110-國文-38",110,"國文",38,"C10","D",2,"關於上文最後一段的感性敘寫，最適當的解讀是："],["110-英文-01",110,"英文",1,"E01","D",2,"The shy little boy spoke so that I had a hard time hearing w"],["110-英文-02",110,"英文",2,"E01","A",2,"I am terribly sorry. Please my sincere apology."],["110-英文-03",110,"英文",3,"E01","D",2,"I am a customer at that restaurant. I eat there at least fou"],["110-英文-04",110,"英文",4,"E01","A",2,"Eating too many potato chips makes you thirsty because chips"],["110-英文-05",110,"英文",5,"E01","A",2,"The weather is very hot in summer, while in winter it is rea"],["110-英文-06",110,"英文",6,"E01","A",2,"Hand washing is one of the best ways to keep healthy and sto"],["110-英文-07",110,"英文",7,"E01","A",2,"In the admission interview, the are often asked to explain w"],["110-英文-08",110,"英文",8,"E01","C",2,"Pets, such as cats and dogs, are humans' favorite companions"],["110-英文-09",110,"英文",9,"E01","B",2,"The weather forecast said the temperature would dip from 20 "],["110-英文-10",110,"英文",10,"E01","C",2,"Many early American Indians preferred hunting, so they lived"],["110-英文-11",110,"英文",11,"E01","A",2,"Marie Curie (居禮夫人) was a magnificent scientist who was the f"],["110-英文-12",110,"英文",12,"E02","B",2,"Anderson: Why are you studying English? Wan-Ting: I hope to "],["110-英文-13",110,"英文",13,"E02","B",2,"Waitress: Lotus Chinese Restaurant. Customer: Hi, could I or"],["110-英文-14",110,"英文",14,"E02","A",2,"Husband: Do you like my new coat? Wife: It looks great! Husb"],["110-英文-15",110,"英文",15,"E02","A",2,"Ken: Is there a drugstore nearby? Ann: Just around the corne"],["110-英文-16",110,"英文",16,"E02","B",2,"Peter: I’d like to rent a car. Clerk: Sure. What kind of car"],["110-英文-17",110,"英文",17,"E02","B",2,"Ling: Do you want me to send you some pineapple cakes? They’"],["110-英文-18",110,"英文",18,"E02","C",2,"Ms. Chen: Pam, _______________? Pam: I work for Smart Comput"],["110-英文-19",110,"英文",19,"E02","C",2,"Peter: Fanny, I got it! Fanny: What? Peter: The jewelry job!"],["110-英文-20",110,"英文",20,"E02","D",2,"Doctor: Good morning, Mr. Lee. How are you feeling today? Mr"],["110-英文-21",110,"英文",21,"E02","C",2,"Teacher: Why are your class scores always so bad? Johnny: Be"],["110-英文-22",110,"英文",22,"E03","C",2,""],["110-英文-23",110,"英文",23,"E03","B",2,""],["110-英文-24",110,"英文",24,"E03","D",2,""],["110-英文-25",110,"英文",25,"E03","D",2,""],["110-英文-26",110,"英文",26,"E03","A",2,""],["110-英文-27",110,"英文",27,"E03","B",2,""],["110-英文-28",110,"英文",28,"E03","C",2,""],["110-英文-29",110,"英文",29,"E03","D",2,""],["110-英文-30",110,"英文",30,"E03","D",2,""],["110-英文-31",110,"英文",31,"E03","A",2,""],["110-英文-32",110,"英文",32,"E04","A",2,"Which of the following is NOT encouraged by the travel princ"],["110-英文-33",110,"英文",33,"E04","C",2,"What do the travel principles probably want visitors to do?"],["110-英文-34",110,"英文",34,"E04","B",2,"Ju-Yi is graduating from the Animal Science Department. She "],["110-英文-35",110,"英文",35,"E04","B",2,"Ming-Hua is interested in becoming a house seller. What shou"],["110-英文-36",110,"英文",36,"E04","B",2,"Why was the 2020 Nobel Peace Prize given to the WFP?"],["110-英文-37",110,"英文",37,"E04","D",2,"Which of the following is closest in meaning to“go hand in h"],["110-英文-38",110,"英文",38,"E04","C",2,"According to the passage, which statement is true?"],["110-英文-39",110,"英文",39,"E04","D",2,"What is the main idea of this article?"],["110-英文-40",110,"英文",40,"E04","D",2,"What are the key things a self-driving car needs in order to"],["110-英文-41",110,"英文",41,"E04","B",2,"Which of the following is true about self-driving cars in 20"],["111-國文-01",111,"國文",1,"C01","A",2,"下列文句，何者有錯別字？"],["111-國文-02",111,"國文",2,"C02","C",2,"下列各組「」內的字，何者意義相同？"],["111-國文-03",111,"國文",3,"C03","C",2,"下文□內，最適合填入的詞語依序是：舊時中國基於美學與感性因素，讀者鍾情於運筆的藝術，偏好與文意□□□□的書體筆法，活字印"],["111-國文-04",111,"國文",4,"C05","B",2,"若要使下文的理路連貫有序，①、②、③、④、⑤最適當的排列應是：魚塭與魚塘雖大約在相同時期引進臺灣，但魚塘因魚苗取得不易，"],["111-國文-05",111,"國文",5,"C04","D",2,"詩句「人心勝潮水，相送過潯陽」，為了凸顯濃厚的送別心意，採取不同性質的事物「人心」與「潮水」相比的手法。下列「……比……"],["111-國文-06",111,"國文",6,"C07","A",2,"下文內，應填入的詞語依序是：「T市政府會議管理系統作業規定」於93年1月5日訂頒，因其規範之「會議管理系統」業於本年1月"],["111-國文-07",111,"國文",7,"C04","D",2,"關於下文畫底線處的病句診斷與修改建議，何者不適當？依通風條件正確選擇熱水器，①才能避免隱形殺手一氧化碳意外中毒。②屋外式"],["111-國文-08",111,"國文",8,"C06","B",2,"下列「人生態度量表」，選「完全同意」至「完全不同意」依序得4至1分。若僅依〈漁父〉的「漁父」、〈赤壁賦〉的「蘇子」在文中"],["111-國文-09",111,"國文",9,"C07","B",2,"有些祝賀題辭可用於兩種不同情境。下圖有五種情境，直線兩端點間的選項，代表用於兩端情境的題辭，其中最不適當的是：人生態度量"],["111-國文-10",111,"國文",10,"C02","B",2,"若參照下框「則」的用法說明，下列甲、乙中的「則」，最適當的歸類是：甲、開車時，則發票；車到時，則收票。乙、一則園子有專定"],["111-國文-11",111,"國文",11,"C10","C",2,"依據上文，何者會是作者對學生的學習要求？"],["111-國文-12",111,"國文",12,"C10","A",2,"下列①、②兩項推論，是否符合上文觀點？①應用文是普遍的讀寫需求，教學不宜專重文學文。②應用文以求「通」為首要，文彩與老練"],["111-國文-13",111,"國文",13,"C10","C",2,"依據上文，何者最不可能列為作者講授的教材？"],["111-國文-14",111,"國文",14,"C08","A",2,"下列敘述，何者符合上文的記載？"],["111-國文-15",111,"國文",15,"C08","B",2,"依據上文，作者對「田中彌望如雪」的感想為何？"],["111-國文-16",111,"國文",16,"C10","C",2,"依據上文，關於華德箱的敘述，何者正確？"],["111-國文-17",111,"國文",17,"C10","D",2,"上文提及「金雞納樹」，主要是為了說明華德箱："],["111-國文-18",111,"國文",18,"C10","D",2,"依據上文，關於十九世紀的英國東印度公司，下列敘述何者正確？"],["111-國文-19",111,"國文",19,"C10","B",2,"依據上文，何者符合英國東印度公司寫信告知福鈞的內容？"],["111-國文-20",111,"國文",20,"C10","D",2,"依據上文，關於福鈞1848至1851年的中國之行，何者敘述正確？"],["111-國文-21",111,"國文",21,"C10","A",2,"若將福鈞的行程繪成下圖，方框①、②、③、④、⑤的年月、地點、事件，哪些與上文所述相符？"],["111-國文-22",111,"國文",22,"C08","D",2,"依據上文，下列敘述何者正確？"],["111-國文-23",111,"國文",23,"C08","A",2,"上文①、②分別填入哪一個詞語，最切合陳景初的感受？"],["111-國文-24",111,"國文",24,"C08","C",2,"上文對西廂棺木的描寫，旨在感慨："],["111-國文-25",111,"國文",25,"C10","D",2,"依據上文關於鋸子的言談，可確切推知："],["111-國文-26",111,"國文",26,"C10","B",2,"依據上文，對①、②臺灣手工具業的推論，最適當的研判是：①大多為中小企業，且形成互助結構。②出口值為全球第二大，僅次於中國"],["111-國文-27",111,"國文",27,"C10","C",2,"下列依上引經濟部新聞資料，對110年臺灣手工具出口情況的文字敘述，何者錯誤？"],["111-國文-28",111,"國文",28,"C08","C",2,"下列何者最接近乙文「人不負礦，礦究何負於人」的想法？"],["111-國文-29",111,"國文",29,"C08","A",2,"關於甲、乙二文的觀點，下列敘述何者正確？"],["111-國文-30",111,"國文",30,"C08","D",2,"關於甲、乙二文寫作手法的解說，何者最不適當？"],["111-國文-31",111,"國文",31,"C08","B",2,"依據唐太宗、特雷默所述，何者是兩人共同的人事管理觀點？"],["111-國文-32",111,"國文",32,"C08","A",2,"依據下列劉基所述，他在同以「制木」為喻談人事管理時，較唐太宗又多一層思考的是："],["111-國文-33",111,"國文",33,"C10","C",2,"下列是人事管理常談到的「彼得原理」。若綜合上文唐太宗、特雷默所述，對「彼得原理」解讀最不適當的是："],["111-國文-34",111,"國文",34,"C10","A",2,"依據下列「彼得原理」示意圖，研判①、②兩項推論，是否合理？①若員工的專長條件不變，採升職方式獎勵，容易形成「彼得原理」案"],["111-國文-35",111,"國文",35,"C09","A",2,"下列何者是從上文可明確獲悉的訊息？"],["111-國文-36",111,"國文",36,"C09","C",2,"小說常透過人物神情的描寫，讓讀者感到不尋常，為下文預做鋪墊。在上文中，對哪個人物有如此安排？"],["111-國文-37",111,"國文",37,"C09","D",2,"關於上文寫作手法的分析，何者最不適當？"],["111-國文-38",111,"國文",38,"C09","A",2,"上文借用下框文獻以編寫情節。若對照二者提出①、②，最適當的研判是：①《夢溪筆談》中的吳丞相，推斷的是「畫中物體所處的時間"],["111-英文-01",111,"英文",1,"E01","A",2,"We had better leave early to the heavy traffic to get home o"],["111-英文-02",111,"英文",2,"E01","A",2,"Anny’s grandson is always full of and wants to go to the par"],["111-英文-03",111,"英文",3,"E01","D",2,"I’ve put on so much weight recently that these jeans are too"],["111-英文-04",111,"英文",4,"E01","D",2,"My boss totally accepted my suggestion and kept nodding to h"],["111-英文-05",111,"英文",5,"E01","B",2,"To protect your head, when you ride a motorcycle, you must w"],["111-英文-06",111,"英文",6,"E01","C",2,"David’s hair color is brown, but he recently dyed it purple."],["111-英文-07",111,"英文",7,"E01","A",2,"We got train seats for the Lunar New Year season as we plann"],["111-英文-08",111,"英文",8,"E01","C",2,"To ease his pressure, Mr. Hung decided to listen to bedtime "],["111-英文-09",111,"英文",9,"E01","B",2,"The police pursued the bank robber through the streets last "],["111-英文-10",111,"英文",10,"E01","D",2,"I have looked through the records extensively, but couldn’t "],["111-英文-11",111,"英文",11,"E02","B",2,"Father: OK! We are ready to start baking a cake. We need to "],["111-英文-12",111,"英文",12,"E02","C",2,"Judy: OK, here’s your tea. But no snacks, as you wanted. Tin"],["111-英文-13",111,"英文",13,"E02","A",2,"Ann: What do you want to see at the computer exhibition? Ken"],["111-英文-14",111,"英文",14,"E02","A",2,"Ted: Do you want to jog around the track one more time? Sue:"],["111-英文-15",111,"英文",15,"E02","B",2,"Tour agent: Welcome to Fun Travel, ma’am. My name is Willy. "],["111-英文-16",111,"英文",16,"E02","A",2,"Ann: Do you want to see a movie? There’s a terrific animated"],["111-英文-17",111,"英文",17,"E02","D",2,"Bank clerk: May I help you? Simon: Yes, where should I go to"],["111-英文-18",111,"英文",18,"E02","B",2,"Wife: So, which apartment do you like? Husband: I like the o"],["111-英文-19",111,"英文",19,"E02","A",2,"Tim: What kind of vacation do you like the best? Kelly: I’m "],["111-英文-20",111,"英文",20,"E02","D",2,"Manager: Lin’s steak house. How may I help you? Mr. White: H"],["111-英文-21",111,"英文",21,"E03","B",2,""],["111-英文-22",111,"英文",22,"E03","D",2,""],["111-英文-23",111,"英文",23,"E03","C",2,""],["111-英文-24",111,"英文",24,"E03","A",2,""],["111-英文-25",111,"英文",25,"E03","B",2,""],["111-英文-26",111,"英文",26,"E03","D",2,""],["111-英文-27",111,"英文",27,"E03","B",2,""],["111-英文-28",111,"英文",28,"E03","C",2,""],["111-英文-29",111,"英文",29,"E03","C",2,""],["111-英文-30",111,"英文",30,"E03","D",2,""],["111-英文-31",111,"英文",31,"E04","A",2,"Since every room only had one guest, how many guests stayed "],["111-英文-32",111,"英文",32,"E04","D",2,"According to the line graph, which of the following is true?"],["111-英文-33",111,"英文",33,"E04","C",2,"What is the competition about?"],["111-英文-34",111,"英文",34,"E04","D",2,"According to the competition rules, which of the following i"],["111-英文-35",111,"英文",35,"E04","C",2,"According to Jim’s email, which of the following is true?"],["111-英文-36",111,"英文",36,"E04","C",2,"Where was Molly when she wrote the email to Jim?"],["111-英文-37",111,"英文",37,"E04","A",2,"Which of the following could be inferred from these emails?"],["111-英文-38",111,"英文",38,"E04","A",2,"What is the purpose of this article?"],["111-英文-39",111,"英文",39,"E04","A",2,"What is the process of CCUS?"],["111-英文-40",111,"英文",40,"E04","C",2,"Why is carbon dioxide put underground?"],["111-英文-41",111,"英文",41,"E04","B",2,"Which of the following is closest in meaning to“momentum”in "],["111-英文-42",111,"英文",42,"E04","B",2,"What can be concluded from paragraph 2?"],["112-國文-01",112,"國文",1,"C01","B",2,"下列文句，何者有錯別字？"],["112-國文-02",112,"國文",2,"C02","A",2,"《射雕英雄傳》：「郭靖把南山刀法使發了，已不用顧盼擬合，信手而應，縱橫前後，悉逢肯綮。」文中「肯綮」的意思、典故出處依序"],["112-國文-03",112,"國文",3,"C02","A",2,"下列文句的「不用」，何者與「客位貨物，不准以多報少；倘有此弊，定即議罰革退不用」的「不用」，意義最接近？"],["112-國文-04",112,"國文",4,"C02","C",2,"參照右框「極」的用法說明，下列甲、乙中的「極」，最適當的歸類是：甲、北通巫峽，南極瀟湘，遷客騷人，多會於此。乙、寶釵道："],["112-國文-05",112,"國文",5,"C04","D",2,"下列文句，何者以反問語氣表達慨歎之意？"],["112-國文-06",112,"國文",6,"C04","B",2,"「柳絲絛子慣於伸入水中，去糾纏水中安靜的雲影和月光」，將描述人的「伸入」、「糾纏」跨界轉用，使柳絲彷彿具有人的作為。下列"],["112-國文-07",112,"國文",7,"C03","A",2,"依據下文，□□□□內最適合填入的詞語依序為何？我細心地帶著最崇高的尊敬，觀察著父親一上一下地削掉木塊，絲毫沒有一點疲倦，"],["112-國文-08",112,"國文",8,"C04","B",2,"下列尋犬啟事的文句，何者明顯有語法缺失？急尋愛犬************************************"],["112-國文-09",112,"國文",9,"C05","D",2,"下列契約文字，甲方是出租人，乙方是承租人。若要使理路連貫有序，①、②、③、④、⑤最適當的排列應是：乙方使用機車發生擦撞或"],["112-國文-10",112,"國文",10,"C06","B",2,"在「古畫動起來」展覽中，若要讓〈李清照酴醿春去圖〉(左)、〈東坡笠屐圖〉(右)的人物跨時代對話，依據畫題、畫面及兩人作品"],["112-國文-11",112,"國文",11,"C09","C",2,"小說通常會描寫人物們眼中的彼此，也會呈現作者眼中的他們。關於下圖「某人看另一人」的敘述，何者最符合甲文觀點或乙文內容？"],["112-國文-12",112,"國文",12,"C09","A",2,"乙文①、②兩句，是否適合做為甲文「支撐著他可憐的存在」的例子？①孔乙己看著問他的人，顯出不屑置辯的神氣。②孔乙己嘴裡說些"],["112-國文-13",112,"國文",13,"C09","A",2,"甲文中「不可信賴的敘事者」，是小說會運用的手法。依據下框的說明，魯迅透過「不可信賴的敘事者」，主要是希望讀者："],["112-國文-14",112,"國文",14,"C09","C",2,"若某位長者想就甲文認為孔乙己「可憐」的原因提出勸慰，最適合的是："],["112-國文-15",112,"國文",15,"C10","A",2,"上文開頭採「一句話即一段」的寫法，通常這句話會以點到為止的方式預告下文內容。如果有讀者做了以下預想，何者無法於下文讀到？"],["112-國文-16",112,"國文",16,"C10","B",2,"上文兩處「」，採用「引述業者談話」的寫法，主要是為了呈現業者："],["112-國文-17",112,"國文",17,"C10","C",2,"上文採用「調整時間順序」的寫法，「1970年代……」那段回溯「過去」，是為了繼前段介紹「現在」後，讓讀者了解："],["112-國文-18",112,"國文",18,"C10","B",2,"依據上列資料，下列敘述何者錯誤？"],["112-國文-19",112,"國文",19,"C08","B",2,"依據下列《瓶史》文字，何者最可能是宏道流的看法？插花不可太繁，亦不可太瘦，多不過二種三種，高低疏密，如畫苑布置，方妙。置"],["112-國文-20",112,"國文",20,"C08","D",2,"下列《瓶花譜》文字，與上列《瓶史》的相同觀點為何？大率插花須要花與瓶稱，令花稍高於瓶。假如瓶高一尺，花出瓶口一尺三四寸，"],["112-國文-21",112,"國文",21,"C08","C",2,"甲、乙二圖出自《宏道流插花圖》，若就整體型態觀察，對①、②的研判應是：①甲圖符合《瓶史》「種類」與「置瓶」的觀點。②乙圖"],["112-國文-22",112,"國文",22,"C08","C",2,"關於上列罰則的理解，何者最適當？"],["112-國文-23",112,"國文",23,"C08","A",2,"依據罰則，對小吳的處罰應是："],["112-國文-24",112,"國文",24,"C08","C",2,"關於上文的理解，何者最適當？"],["112-國文-25",112,"國文",25,"C08","A",2,"依據上文，廬兒、客對士人說的話，主要用意為何？廬兒曰：「已晚，須明日。」客復屬耳：「當早至，我俟於此。」"],["112-國文-26",112,"國文",26,"C08","B",2,"依據上文與下圖，哪些是士人受騙的原因？"],["112-國文-27",112,"國文",27,"C08","B",2,"依據上文，下列各組「」內詞語的意義，何者相同？"],["112-國文-28",112,"國文",28,"C08","C",2,"「呈現異同」是說明事物常用的方式，其基礎常來自作者對事物異、同的科學觀察。依據沈括所述，何者不是他的觀察結果？"],["112-國文-29",112,"國文",29,"C10","D",2,"依據銅鏡演變簡圖及沈括之文，關於①、②的研判應是：①從圖中所舉的古鏡大小看，完全符合沈括所云「鑑大則平，鑑小則凸」。②沈"],["112-國文-30",112,"國文",30,"C10","B",2,"上列資料內若要概括「當代學者」的觀點，內最適合填入的是："],["112-國文-31",112,"國文",31,"C10","D",2,"上文描述的「這隻陶枕」，具有何種特色？"],["112-國文-32",112,"國文",32,"C10","A",2,"上文主要從哪個層面，指出陶枕「代表宋代藝術精神」？"],["112-國文-33",112,"國文",33,"C10","B",2,"關於上文寫作手法與意義，何者敘述最適當？"],["112-國文-34",112,"國文",34,"C10","C",2,"關於上文第二段的寫作手法與意義，何者敘述不適當？"],["112-國文-35",112,"國文",35,"C10","B",2,"上文透過「當天……」為開頭的兩段，主要是想表達："],["112-國文-36",112,"國文",36,"C10","C",2,"某鞋廠辦理「鞋業產品研發培訓班」時，將上文所引寶成集團主管的言談，歸納為四項鞋業優勢。下列敘述，最符合其原意的是："],["112-國文-37",112,"國文",37,"C09","C",2,"上文所述長米蒸煮後所呈現的特性，與何者最接近？"],["112-國文-38",112,"國文",38,"C09","B",2,"上文對「米的天性既純真又深情」、「白飯之於佳肴，好比畫布之於色彩和線條」的解說，依序相當於右圖的哪個理由？"],["112-英文-01",112,"英文",1,"E01","B",2,"It is a big for people in this small town to learn that the "],["112-英文-02",112,"英文",2,"E01","C",2,"The animal rights group is going to a party to raise money f"],["112-英文-03",112,"英文",3,"E01","A",2,"I have finished writing the novel, and I’m going to complete"],["112-英文-04",112,"英文",4,"E01","D",2,"In some countries, looking at someone in the eye for too lon"],["112-英文-05",112,"英文",5,"E01","B",2,"If you keep blowing air into the balloon, it will with a lou"],["112-英文-06",112,"英文",6,"E01","D",2,"The boss agreed to increase workers’, so they can make more "],["112-英文-07",112,"英文",7,"E01","D",2,"Since my teeth are very to sweets, I don’t eat candies and c"],["112-英文-08",112,"英文",8,"E01","C",2,"Amy’s proposal to get funding from the school did not meet a"],["112-英文-09",112,"英文",9,"E01","A",2,"William’s mother was seriously hurt in the car accident; she"],["112-英文-10",112,"英文",10,"E01","A",2,"I’m sorry that I don’t have any spare money to lend you. I s"],["112-英文-11",112,"英文",11,"E02","D",2,"Anita: There’s a famous Chinese restaurant across the road. "],["112-英文-12",112,"英文",12,"E02","A",2,"Betty: Hello. I’m calling about your ad for the five-room re"],["112-英文-13",112,"英文",13,"E02","C",2,"Alex: I’m interested in buying an electric car. Sales: Good "],["112-英文-14",112,"英文",14,"E02","B",2,"Jane: Guess what I saw during my trip to Paris last month? R"],["112-英文-15",112,"英文",15,"E02","C",2,"David: Do you like watching judo (柔道) competitions? Annie: N"],["112-英文-16",112,"英文",16,"E02","B",2,"Jimmy: I need to find a part-time job, Ms. King. Ms. King: M"],["112-英文-17",112,"英文",17,"E02","D",2,"Secretary: Hello, Dean’s office, may I help you? Jack: Good "],["112-英文-18",112,"英文",18,"E02","B",2,"Ms. Lin: Ms. Ting, Stella’s ballet show yesterday was terrif"],["112-英文-19",112,"英文",19,"E02","A",2,"Angel: Have you ever met new friends online? Teddy: Yes, I h"],["112-英文-20",112,"英文",20,"E02","B",2,"Nancy: Let’s go out and play badminton. Do you know where th"],["112-英文-21",112,"英文",21,"E03","A",2,""],["112-英文-22",112,"英文",22,"E03","C",2,""],["112-英文-23",112,"英文",23,"E03","B",2,""],["112-英文-24",112,"英文",24,"E03","A",2,""],["112-英文-25",112,"英文",25,"E03","D",2,""],["112-英文-26",112,"英文",26,"E03","A",2,""],["112-英文-27",112,"英文",27,"E03","C",2,""],["112-英文-28",112,"英文",28,"E03","D",2,""],["112-英文-29",112,"英文",29,"E03","D",2,""],["112-英文-30",112,"英文",30,"E03","C",2,""],["112-英文-31",112,"英文",31,"E04","D",2,"How much does David spend on soft drinks every month?"],["112-英文-32",112,"英文",32,"E04","B",2,"Which of the following is true?"],["112-英文-33",112,"英文",33,"E04","C",2,"Which part should you check to find out how to take the medi"],["112-英文-34",112,"英文",34,"E04","B",2,"Which effect should you be aware of if you want to take the "],["112-英文-35",112,"英文",35,"E04","A",2,"According to the label, which of the following is true?"],["112-英文-36",112,"英文",36,"E04","A",2,"Which is NOT mentioned as how job scams work?"],["112-英文-37",112,"英文",37,"E04","C",2,"Which of the following is true?"],["112-英文-38",112,"英文",38,"E04","B",2,"What is the passage mainly about?"],["112-英文-39",112,"英文",39,"E04","D",2,"Which is closest in meaning to the phrase“live tracking”in p"],["112-英文-40",112,"英文",40,"E04","D",2,"According to the passage, how has technology changed sports "],["112-英文-41",112,"英文",41,"E04","A",2,"In the writer’s opinion, what is the best benefit of using t"],["112-英文-42",112,"英文",42,"E04","D",2,"Which of the following statements is true?"],["113-國文-01",113,"國文",1,"C01","C",2,"下列文句，何者有錯別字？"],["113-國文-02",113,"國文",2,"C02","D",2,"下列文句的「如」，何者與「他植者雖窺伺傚慕，莫能如也」的「如」意義最接近？"],["113-國文-03",113,"國文",3,"C04","D",2,"「他是鵝蛋臉，臥蠶眉。」句中「鵝蛋」、「臥蠶」用來修飾其後的臉、眉，意指鵝蛋般的臉，臥蠶般的眉。下列「」內的詞，何者有相"],["113-國文-04",113,"國文",4,"C03","C",2,"依據下文，□內最適合填入的詞語依序為何？對演員來說，聾啞角色雖是限制，也可能是機會。吳慷仁在《富都青年》中掌握手語節奏與"],["113-國文-05",113,"國文",5,"C04","D",2,"關於下文運用空間事物的寫作手法，何者敘述最適當？從那以後，我就墊著矮凳替母親梳頭，梳那最簡單的鮑魚頭。我點起腳尖，從鏡子"],["113-國文-06",113,"國文",6,"C07","B",2,"右圖是一副具有儒家內涵的對聯，依上、下聯規則，○○、□□最適當的詞語應是："],["113-國文-07",113,"國文",7,"C05","A",2,"若要使下文的理路連貫有序，①、②、③、④、⑤最適當的排列應是：進得店來，①夥計於氣餒之餘，②自然歡天喜地的捧出他的貨色，"],["113-國文-08",113,"國文",8,"C02","D",2,"「視而不見」、「口惠而實不至」的「而」，相當於「卻」，用來表示其前、後詞語有轉折關係。下列文句中的「而」，何者有相同用法"],["113-國文-09",113,"國文",9,"C06","B",2,"雙方立場不一致時，通常會就下圖所示五種策略擇一回應。依據〈燭之武退秦師〉、〈漁父〉，對①、②的研判應是：①秦穆公與燭之武"],["113-國文-10",113,"國文",10,"C08","B",2,"《天工開物‧舟車》：「人有貴而必出，行畏周行；物有賤而必須，坐窮負販。四海之內，南資舟而北資車。」這段話若依下框所示，繪"],["113-國文-11",113,"國文",11,"C10","C",2,"下列何者最符合上文所述？"],["113-國文-12",113,"國文",12,"C10","B",2,"依據上文，山上憶良認為大伴旅人從〈蘭亭集序〉得到的啟發，主要為何？"],["113-國文-13",113,"國文",13,"C08","C",2,"若將大伴旅人〈梅花歌序〉、王羲之〈蘭亭集序〉的部分文字相比較，何者理解不適當？大伴旅人〈梅花歌序〉王羲之〈蘭亭集序〉①天"],["113-國文-14",113,"國文",14,"C08","A",2,"若山上憶良讀過下列兩首詩，①、②、③、④何者屬於文末他說「早知要由此著筆」的「此」的範圍？梅嶺花初發，天山雪未開。①雪處"],["113-國文-15",113,"國文",15,"C10","A",2,"下圖為公元730年大宰府梅花宴的部分歌詞。依據上文，關於①、②的研判應是：①甲可能是大伴旅人；丙可能是山上憶良。②丁比乙"],["113-國文-16",113,"國文",16,"C10","D",2,"依據上文，Ⅰ、Ⅱ兩件作品中，何者是羅馬人？"],["113-國文-17",113,"國文",17,"C10","B",2,"依據上文，關於：①兩件作品的完成時代、②兩件作品所呈現的事件發生時間，下列敘述何者正確？"],["113-國文-18",113,"國文",18,"C10","A",2,"「羅馬人劫掠薩賓婦女」傳說在後世有不同的理解。依據上文，下列敘述何者最適當？"],["113-國文-19",113,"國文",19,"C10","B",2,"上文末段內，最適合填入的是："],["113-國文-20",113,"國文",20,"C10","C",2,"第二段在上文整體脈絡中，主要用意在彰顯洗衣機："],["113-國文-21",113,"國文",21,"C10","A",2,"上文以「不應把望遠鏡拿反」為論點，「把望遠鏡拿反」意指："],["113-國文-22",113,"國文",22,"C10","B",2,"為了支持論點，上文以「電報與郵寄、email與傳真所需時間的差距」為論據，此方式的說服力也有人認為有待商榷。下框採取類似"],["113-國文-23",113,"國文",23,"C08","C",2,"依據上文，「常見案例」中「訟師」所稱「幫你討個公道」，意指：讓地主：讓阿吉："],["113-國文-24",113,"國文",24,"C08","B",2,"下列的告誡對象與重點，何者最符合碑文「部分內容」？"],["113-國文-25",113,"國文",25,"C08","A",2,"「訟師有話要說」末尾，「訟師」意在揭露何種社會現象？"],["113-國文-26",113,"國文",26,"C08","C",2,"敘述時，依照述說者、閱聽者的身分差異，會使用不同述說口吻。碑文「部分內容」所使用的口吻，與下列何者最接近？"],["113-國文-27",113,"國文",27,"C10","D",2,"依據上文，何者不是促進臺灣自行車產業發展的因素？"],["113-國文-28",113,"國文",28,"C10","D",2,"關於上文寫作方式與意義，何者最適當？"],["113-國文-29",113,"國文",29,"C10","A",2,"下表資訊來自經濟部資料庫，其有助正確理解上文的是："],["113-國文-30",113,"國文",30,"C08","D",2,"依據「納貓契」，交易雙方最可能是："],["113-國文-31",113,"國文",31,"C08","A",2,"下列何者最符合「納貓契」所述？"],["113-國文-32",113,"國文",32,"C08","C",2,"下列何者不是「納貓法」的建議作為？"],["113-國文-33",113,"國文",33,"C08","D",2,"如果喵星人想就H、Z先生提出下列辯駁，請研判①、②是否尚稱合理？①給H先生：我雖沒做到「鼠賊從茲補不閒」，但至少「不害六"],["113-國文-34",113,"國文",34,"C09","C",2,"乙、丙二文敘寫魚的「從容」，即甲文所說的「擬人化」。下列敘述，何者最符合文意？"],["113-國文-35",113,"國文",35,"C09","D",2,"乙、丙二文的獵捕，皆以失敗收場，下列敘述，何者最符合文意？"],["113-國文-36",113,"國文",36,"C09","C",2,"乙、丙二文的獵捕結局，或可就「反省人類中心主義」延伸思考―亦即不應自居萬物主宰而妄施掠奪。下列文句，何者最接近此意？"],["113-國文-37",113,"國文",37,"C10","B",2,"依據上文，何者最接近「IKEA效應」？"],["113-國文-38",113,"國文",38,"C10","D",2,"依據上文，在下列二圖的哪個區域，最應注意「IKEA效應」的負面影響？"],["113-英文-01",113,"英文",1,"E01","D",2,"Johnny is wearing a very hat that looks different from those"],["113-英文-02",113,"英文",2,"E01","B",2,"Loud noises can make it hard for me to , so I always find a "],["113-英文-03",113,"英文",3,"E01","C",2,"Here is a helpful for cooking chicken soup: add a little sal"],["113-英文-04",113,"英文",4,"E01","D",2,"My grandpa sleeps at the same time every day. He goes to bed"],["113-英文-05",113,"英文",5,"E01","B",2,"Being friendly with your roommates can help you stay away fr"],["113-英文-06",113,"英文",6,"E01","D",2,"Jack is a very person. He will never change his decisions no"],["113-英文-07",113,"英文",7,"E01","A",2,"Kuo, Hsing-chun (郭婞淳) won a gold medal in the 2020 Tokyo Oly"],["113-英文-08",113,"英文",8,"E01","C",2,"Though she hurt her arm last week, Amy could still play the "],["113-英文-09",113,"英文",9,"E01","A",2,"May has to conquer her fear of flying if she wants to travel"],["113-英文-10",113,"英文",10,"E01","A",2,"It is against the law for drivers not to stop at the crosswa"],["113-英文-11",113,"英文",11,"E02","B",2,"Customer: I’d like to have one oyster omelette and fried noo"],["113-英文-12",113,"英文",12,"E02","B",2,"Tina: An old friend is coming to visit me tomorrow. I haven’"],["113-英文-13",113,"英文",13,"E02","D",2,"Mrs. Chen: I heard that the new neighbors moved in yesterday"],["113-英文-14",113,"英文",14,"E02","A",2,"Adam: We all know that the Wright brothers (萊特兄弟) flew the f"],["113-英文-15",113,"英文",15,"E02","D",2,"Amy: Did you finish your report for the Performing Arts clas"],["113-英文-16",113,"英文",16,"E02","D",2,"Rita: Why did you apply for this position? Ben: I’d like to "],["113-英文-17",113,"英文",17,"E02","C",2,"Sue: How’s the project going? Eric: It’s going well. Sue: Oh"],["113-英文-18",113,"英文",18,"E02","C",2,"Jason: Where are you? The presentation is about to begin. Su"],["113-英文-19",113,"英文",19,"E02","D",2,"Student: Sir, we are raising money to help save the rainfore"],["113-英文-20",113,"英文",20,"E02","A",2,"Jack: I got a text message from the hotel. They ask us to cl"],["113-英文-21",113,"英文",21,"E03","C",2,""],["113-英文-22",113,"英文",22,"E03","C",2,""],["113-英文-23",113,"英文",23,"E03","B",2,""],["113-英文-24",113,"英文",24,"E03","A",2,""],["113-英文-25",113,"英文",25,"E03","C",2,""],["113-英文-26",113,"英文",26,"E03","B",2,""],["113-英文-27",113,"英文",27,"E03","A",2,""],["113-英文-28",113,"英文",28,"E03","D",2,""],["113-英文-29",113,"英文",29,"E04","C",2,"Which of the following is NOT true about the timetable?"],["113-英文-30",113,"英文",30,"E04","A",2,"Maria is planning to take a train from Taichung to Taipei th"],["113-英文-31",113,"英文",31,"E04","D",2,"Minhua and Yating are interested in playing a team sport, wh"],["113-英文-32",113,"英文",32,"E04","A",2,"Fuhao works in the evening on Mondays and Tuesdays. Which cl"],["113-英文-33",113,"英文",33,"E04","C",2,"Which facility or service is provided by both hotels?"],["113-英文-34",113,"英文",34,"E04","B",2,"How far does Lina have to drive to the Theme Park if she sta"],["113-英文-35",113,"英文",35,"E04","B",2,"Which of the following is true?"],["113-英文-36",113,"英文",36,"E04","D",2,"What is the main idea of this passage?"],["113-英文-37",113,"英文",37,"E04","B",2,"According to the passage, which is NOT an example of“pushing"],["113-英文-38",113,"英文",38,"E04","B",2,"Based on the passage, arrange the following events in the or"],["113-英文-39",113,"英文",39,"E04","D",2,"What is the passage mainly about?"],["113-英文-40",113,"英文",40,"E04","C",2,"Which is closest in meaning to“reflected”in the second parag"],["113-英文-41",113,"英文",41,"E04","C",2,"According to the passage, which of the following is true?"],["113-英文-42",113,"英文",42,"E04","A",2,"Which of the following can be inferred from the passage abou"],["114-國文-01",114,"國文",1,"C01","A",2,"下列文句，何者有錯別字？"],["114-國文-02",114,"國文",2,"C04","C",2,"「把」做為介詞，可表達右框所示的兩種意義。下列含「把」的文句，何者最適合列為②的例句？"],["114-國文-03",114,"國文",3,"C02","D",2,"新冠肺炎疫情嚴峻時期，多家航空公司推出「類出國航班」，飛至鄰近國家上空再返航停國內機場。下列文句的「類」，何者與「類出國"],["114-國文-04",114,"國文",4,"C04","D",2,"下文畫底線處的文句修改建議，何者正確？詐騙集團常假冒警察機關名義，以電話通知民眾：①因查案時發現民眾遭歹徒冒名申辦帳戶，"],["114-國文-05",114,"國文",5,"C05","B",2,"若要使下文的理路連貫有序，①、②、③、④、⑤最適當的排列應是：韓劇《魷魚遊戲》的成功之處，①不僅在於劇情緊湊刺激，②與無"],["114-國文-06",114,"國文",6,"C04","C",2,"下表四種因果論證圖解，是比爾茲利( Monroe Curtis Beardsley )在1950年所提出。表中搭配的例句"],["114-國文-07",114,"國文",7,"C06","C",2,"前人認為宋詞可分「婉約詞」、「豪放詞」。有一研究從兩類作品取樣發現：其高頻率字、詞前六名如下表所示，確有差異，則①、②、"],["114-國文-08",114,"國文",8,"C03","B",2,"下文□□□□內，最適合填入的詞語依序是：炒米粉，是最普及的一種臺灣吃食。我們可以在□□□□的攤販夜市嘗食，也可以在標榜著"],["114-國文-09",114,"國文",9,"C08","A",2,"「雙氣泡圖」通常用於呈現兩個事物的共同點、相異點。若要將下文所述「耳鑒」、「揣骨聽聲」繪成雙氣泡圖：介於二者間的實線圈表"],["114-國文-10",114,"國文",10,"C08","B",2,"危機發生時，當事人為凝聚同陣營者，通常會使用形象修護策略。下列案例中的鄭文公面對燭之武、劉邦面對張良時，使用的策略為何？"],["114-國文-11",114,"國文",11,"C09","D",2,"關於甲文巡警、乙文查大人的逞威尋釁，下列敘述何者正確？"],["114-國文-12",114,"國文",12,"C09","D",2,"甲、乙文畫底線處的解釋，何者最適當？"],["114-國文-13",114,"國文",13,"C09","B",2,"關於甲、乙文敘寫手法的說明，何者最適當？"],["114-國文-14",114,"國文",14,"C09","A",2,"依據下框所示的諷刺手法常見特徵，下列乙文中作者使用的兩項諷刺，最可能含有何種特徵？Ⅰ、（查大人）輕輕地打他一掌說：……那"],["114-國文-15",114,"國文",15,"C09","B",2,"若要形容「巡警和查大人的心態」、「賴和對巡警和查大人行徑的批評」，最適合的文句分別是：巡警和查大人的心態：賴和對巡警和查"],["114-國文-16",114,"國文",16,"C10","B",2,"依據上文，下列構造位於各燈何處？長信宮燈導煙管夾燈盞放水處銅牛燈放油處"],["114-國文-17",114,"國文",17,"C10","D",2,"依據上文，關於燈具的敘述，何者正確？"],["114-國文-18",114,"國文",18,"C10","A",2,"上文三個燈具，在設計上的共同考量要素為何？"],["114-國文-19",114,"國文",19,"C10","B",2,"依據上文，下列①、②兩項陳述是否適當，正確的研判是：①由〈桃花源記〉「自云先世避秦時亂，率妻子、邑人來此絕境，……乃不知"],["114-國文-20",114,"國文",20,"C08","C",2,"關於焦奇的人物形象解讀，何者最符合上文所述？"],["114-國文-21",114,"國文",21,"C08","C",2,"關於上文寫作技巧的敘述，何者最適當？"],["114-國文-22",114,"國文",22,"C08","A",2,"上文作者說完此故事後，認為焦奇並非「大敵勇而小敵怯」，而是「函牛之鼎不可以烹小鮮，千斤之弩不可以中鼷鼠」，這句話的意思與"],["114-國文-23",114,"國文",23,"C08","D",2,"上文描寫焦奇擊貓，使用「焦怒……→焦愈怒……」的遞進手法。下列文句，何者也有類似敘寫方式？"],["114-國文-24",114,"國文",24,"C08","C",2,"依據上列資料，可以確知的是："],["114-國文-25",114,"國文",25,"C08","D",2,"若要就上列資料，說明古代韓國士大夫兩種想法：①視岳陽樓為勝景的代表，②視〈岳陽樓記〉作者為理想人格的表徵，分別適合以誰的"],["114-國文-26",114,"國文",26,"C08","D",2,"李穡的詩頗多漢文典故。關於右框二詩運用「岳陽樓」、「陶淵明」典故的解說，正確的研判是：①〈詠月〉以「岳陽樓」的湖中倒影浮"],["114-國文-27",114,"國文",27,"C08","C",2,"上列資料中的詞語解釋，何者最適當？"],["114-國文-28",114,"國文",28,"C10","B",2,"若依上文標記右圖，何者正確？"],["114-國文-29",114,"國文",29,"C10","C",2,"依據上文，關於臺灣遠洋漁業的敘述，何者正確？"],["114-國文-30",114,"國文",30,"C10","D",2,"下列藉甲圖、乙表以佐證上文的想法，何者明顯不適當？"],["114-國文-31",114,"國文",31,"C10","D",2,"依據上文，關於蘭芳公司的敘述，何者正確？"],["114-國文-32",114,"國文",32,"C10","A",2,"依據上文，關於婆羅洲華人公司的敘述，何者正確？"],["114-國文-33",114,"國文",33,"C10","A",2,"蘭芳公司的某些情況，常成為「婆羅洲華人公司是否為共和國」的論證事例。依據上文，不同觀點的言論最可能以①、②、③何者為支持"],["114-國文-34",114,"國文",34,"C10","A",2,"某篇敘述蘭芳公司歷史的文章說：「羅芳伯未號稱『大唐總長』，也未以『蘭芳』紀元」。依據上文，可推知其採用文獻的作法及理由為"],["114-國文-35",114,"國文",35,"C08","B",2,"《海錄》是嘉應州人謝清高的南洋經歷紀錄，1820年刊行。下列是書中關於羅芳伯的記載，①～⑤的解釋，何者符合上文？乾隆中，"],["114-國文-36",114,"國文",36,"C10","A",2,"依據上文，關於全日物流的敘述，何者正確？"],["114-國文-37",114,"國文",37,"C10","B",2,"依據上文，全日物流為了向餐飲業者提供蔬果鏈，在本業外增加的項目為何？"],["114-國文-38",114,"國文",38,"C10","C",2,"關於上文寫作手法與意義，何者敘述最適當？"],["114-英文-01",114,"英文",1,"E01","A",2,"This child is using colored chalks to pictures on a blank pi"],["114-英文-02",114,"英文",2,"E01","B",2,"The room was so that I couldn’t even find space for these ne"],["114-英文-03",114,"英文",3,"E01","B",2,"Many people have climbed the main of Mount Jade in Taiwan, w"],["114-英文-04",114,"英文",4,"E01","C",2,"After looking at his grandfather’s on the wall, John was hap"],["114-英文-05",114,"英文",5,"E01","C",2,"It is risky for people to touch plants in rainforests becaus"],["114-英文-06",114,"英文",6,"E01","A",2,"Governments have the to punish people who drink and drive."],["114-英文-07",114,"英文",7,"E01","A",2,"During the night, the sensor lights in the park will turn on"],["114-英文-08",114,"英文",8,"E01","D",2,"Chen Chieh-hsien (陳傑憲) the WBSC Premier12 2024 MVP ( Most Va"],["114-英文-09",114,"英文",9,"E01","D",2,"Mary came to me and introduced herself again. Apparently, sh"],["114-英文-10",114,"英文",10,"E01","C",2,"My sister decided to abandon her old habits and start a fres"],["114-英文-11",114,"英文",11,"E02","A",2,"Dad: Hey, you’re always on your phone! Son: I know. I just l"],["114-英文-12",114,"英文",12,"E02","C",2,"Lucy: Do you know that plastics can take 20 years to break d"],["114-英文-13",114,"英文",13,"E02","A",2,"Vendor: These vegetables are chemical free. Customer: They l"],["114-英文-14",114,"英文",14,"E02","D",2,"Ken: The line is too long! Let’s cut in line, so we can get "],["114-英文-15",114,"英文",15,"E02","A",2,"Dave: I’m going to a job interview this Thursday. What shoul"],["114-英文-16",114,"英文",16,"E02","D",2,"Anna: Hey Terry, do you know that Lee Yang (李洋) and Wang Chi"],["114-英文-17",114,"英文",17,"E02","B",2,"Mom: Guess what? A high school student offered his seat to m"],["114-英文-18",114,"英文",18,"E02","C",2,"Housekeeping: May I help you? Mrs. Liu: Yes. I’m Mrs. Liu. W"],["114-英文-19",114,"英文",19,"E02","D",2,"Ms. Lee: Are you an art lover, Johnson? Johnson: I’m passion"],["114-英文-20",114,"英文",20,"E02","B",2,"Paul: I read an article online. It said Thomas Edison (湯瑪斯．愛"],["114-英文-21",114,"英文",21,"E03","C",2,""],["114-英文-22",114,"英文",22,"E03","B",2,""],["114-英文-23",114,"英文",23,"E03","B",2,""],["114-英文-24",114,"英文",24,"E03","A",2,""],["114-英文-25",114,"英文",25,"E03","A",2,""],["114-英文-26",114,"英文",26,"E03","C",2,""],["114-英文-27",114,"英文",27,"E03","B",2,""],["114-英文-28",114,"英文",28,"E03","A",2,""],["114-英文-29",114,"英文",29,"E04","A",2,"What is the best title for the poster?"],["114-英文-30",114,"英文",30,"E04","D",2,"According to the poster, which of the following statements i"],["114-英文-31",114,"英文",31,"E04","D",2,"According to the conversation and the table, which of the fo"],["114-英文-32",114,"英文",32,"E04","C",2,"According to the conversation, which data plan will Dave cho"],["114-英文-33",114,"英文",33,"E04","B",2,"Which month has the most typhoons in 2023?"],["114-英文-34",114,"英文",34,"E04","D",2,"Which of the following statements is true?"],["114-英文-35",114,"英文",35,"E04","D",2,"Which of the following charts shows the data on the table co"],["114-英文-36",114,"英文",36,"E04","C",2,"What is the main idea of this passage?"],["114-英文-37",114,"英文",37,"E04","C",2,"What does“It”in the second paragraph refer to?"],["114-英文-38",114,"英文",38,"E04","B",2,"According to the passage, which function is NOT mentioned in"],["114-英文-39",114,"英文",39,"E04","A",2,"What is the topic of the passage?"],["114-英文-40",114,"英文",40,"E04","D",2,"What is the main idea of the third paragraph?"],["114-英文-41",114,"英文",41,"E04","B",2,"According to the passage, which of the following statements "],["114-英文-42",114,"英文",42,"E04","B",2,"Arrange the following events according to the historical tim"],["115-國文-01",115,"國文",1,"C01","C",2,"下列文句，何者有錯別字？"],["115-國文-02",115,"國文",2,"C02","A",2,"依據下文兩個「然」的用法，下列敘述，何者正確？蘇子愀①然，正襟危坐而問客曰︰「何為其②然也？」"],["115-國文-03",115,"國文",3,"C03","A",2,"下文敘述元始天尊因商朝將亡而召見姜子牙，依據文意，□□□□內最適合填入的詞語依序為何？子牙忙至寶殿座前行禮曰：「弟子姜尚"],["115-國文-04",115,"國文",4,"C04","D",2,"下框例句為「就一事物區分為兩個類別，呈現不同的功能或用途」。下列文句，何者也屬此一表述方式？"],["115-國文-05",115,"國文",5,"C02","B",2,"現今中文常用詞語中，有些是日本新造詞，如「電話」；有些是日本將古代詞改了意義，如「交通」，在古代是〈桃花源記〉「阡陌交通"],["115-國文-06",115,"國文",6,"C06","B",2,"下圖是某講解單元的內容摘要，此單元的名稱最可能為何？"],["115-國文-07",115,"國文",7,"C04","C",2,"「屈原既放，遊於江潭，行吟澤畔，顏色憔悴」，敘述者的視線是由整體（屈原）聚焦到局部（面容）。下列文字，何者也運用類似的敘"],["115-國文-08",115,"國文",8,"C06","A",2,"〈庖丁解牛〉的文惠君，因庖丁闡述「游刃有餘」而「得養生焉」；〈種樹郭橐駝傳〉的問者，因郭橐駝闡述「順木之天」而「得養人術"],["115-國文-09",115,"國文",9,"C05","B",2,"若要使下文的理路連貫有序，①、②、③、④、⑤最適當的排列應是：在電視機逐漸普及的年代，黃俊雄繼承父親黃海岱的志業，首度將"],["115-國文-10",115,"國文",10,"C06","D",2,"下列對話. .內應填入的是："],["115-國文-11",115,"國文",11,"C09","D",2,"關於甲、乙二文晚輩送終的敘述，何者正確？"],["115-國文-12",115,"國文",12,"C09","C",2,"關於甲、乙二文寫作內容與手法的比較，何者正確？"],["115-國文-13",115,"國文",13,"C09","D",2,"關於甲文①②、乙文③④劃線文句的理解，何者最適當？"],["115-國文-14",115,"國文",14,"C09","B",2,"依據下表解讀甲、乙二文，何者不適當？兩種敘述觀點兩種敘述觀點皆可明示或暗示作者意圖。基於特定需要，某些作品會兩種敘述觀點"],["115-國文-15",115,"國文",15,"C09","B",2,"若將甲文「會不會和上一次一樣？」、乙文「名義上說」視為作者透露諷刺意圖的線索，甲、乙二文諷刺之事依序應是："],["115-國文-16",115,"國文",16,"C08","A",2,"《紅樓夢》中的賈府人口眾多，成員總會經歷程度不一的「社會情緒學習」。依據上文，何者最符合探春在事件中的經驗？"],["115-國文-17",115,"國文",17,"C08","C",2,"上文中，趙姨娘提及襲人母親、鴛鴦母親，主要用意為何？"],["115-國文-18",115,"國文",18,"C08","D",2,"上文趙姨娘為達到目的，利用「我們是親人」發展兩項情緒勒索說辭，探春分別以何種方式回擊？回擊甲回擊乙"],["115-國文-19",115,"國文",19,"C08","B",2,"依據上文與右圖，何者最符合鄭國匠人的想法？轉職前，他自認所做的工作屬於：他希望，轉職後所做的工作屬於："],["115-國文-20",115,"國文",20,"C08","B",2,"依據上文所述的白圭從商經驗，他最可能提出哪句箴言？"],["115-國文-21",115,"國文",21,"C10","C",2,"上文農會理事談「時間落後」，主要是想對「與會人員」表達何種觀點？"],["115-國文-22",115,"國文",22,"C10","A",2,"依據上文，何者最可能是鄭國匠人的「可轉移技能」？①領導力②執行力③人際溝通④學習新知⑤工作流程優化"],["115-國文-23",115,"國文",23,"C10","D",2,"關於上文所述考古研究的取材、目的與成果，何者正確？"],["115-國文-24",115,"國文",24,"C10","A",2,"有研究者推論丹尼索瓦人「具有適應多種環境的能力」，依據上文，主要是基於何種事證提出這項推論？"],["115-國文-25",115,"國文",25,"C10","C",2,"下列指示AI繪圖的文字，何者最符合由上文得知的更新世臺灣海峽生態地貌？"],["115-國文-26",115,"國文",26,"C10","A",2,"依據上文，關於考古結合自然科學研究的①、②敘述，最適當的研判是：①除了提取化石DNA，古蛋白質體學也是有助解析史前人類演"],["115-國文-27",115,"國文",27,"C10","B",2,"依據上文，右圖兩種指南魚若靜止於預設的方位，方位甲、乙依序為何？"],["115-國文-28",115,"國文",28,"C08","B",2,"依據上文，關於《事林廣記》的指南魚、指南龜，何者正確？"],["115-國文-29",115,"國文",29,"C10","C",2,"依據上文所述「當代研究甚多」，這些研究的共同課題為何？"],["115-國文-30",115,"國文",30,"C10","D",2,"依據上文，關於①、②兩項推論，最適當的研判是：①古人連接子位和午位的直線，與現今將地球分為南北半球的赤道平行。②古人雖不"],["115-國文-31",115,"國文",31,"C10","A",2,"投影片常減少文字，改用圖示。若甲的部分內容改為圖(一)，主題【】與項目、最適合填入：①建立偏鄉及離島無人機物資運補機制②"],["115-國文-32",115,"國文",32,"C10","C",2,"綜括乙所列二點，該頁頂端______________內最適合以何者為標題？"],["115-國文-33",115,"國文",33,"C10","D",2,"若於口述丙、丁後，扼要歸納「翔隆航太」、「擎壤科技」的異同，最適合的是："],["115-國文-34",115,"國文",34,"C10","C",2,"有人建議：「這份簡報以報導者的立場，介紹無人機的政策方向、公司特色，不宜混入帶有自我宣傳口吻的告示。」依據此建議，哪一張"],["115-國文-35",115,"國文",35,"C10","B",2,"上文.內，若要填入最符合表(一)的文句，應是："],["115-國文-36",115,"國文",36,"C10","A",2,"依據右框，上文特許廳的主張、集英社的答辯，聚焦於何種商標識別性？"],["115-國文-37",115,"國文",37,"C10","D",2,"關於《鬼滅之刃》的內容，何者最符合上文所述？"],["115-國文-38",115,"國文",38,"C10","A",2,"日治時的臺灣也經歷「大正時期」。下列建築樣貌，何者最能展現上文所述的當時風潮？"],["115-英文-01",115,"英文",1,"E01","D",2,"These clothes are still , so you need to hang them in the su"],["115-英文-02",115,"英文",2,"E01","B",2,"Wang Guan-hong (王冠閎) , Taiwan’s“Butterfly King,”began his sw"],["115-英文-03",115,"英文",3,"E01","B",2,"The teacher treats all her students , giving every student t"],["115-英文-04",115,"英文",4,"E01","D",2,"With a calm, beautiful beach just within walking distance, t"],["115-英文-05",115,"英文",5,"E01","A",2,"In order to more customers, the bakery caféoffers a 20 % dis"],["115-英文-06",115,"英文",6,"E01","A",2,"Weather forecasts for one or two days ahead are quite , prov"],["115-英文-07",115,"英文",7,"E01","D",2,"Amy was certain that she had a high fever after measuring he"],["115-英文-08",115,"英文",8,"E01","A",2,"When the award presenter Shu Qi (舒淇) as the winner of the Be"],["115-英文-09",115,"英文",9,"E01","A",2,"When buying a car, those who want to save money will pick a "],["115-英文-10",115,"英文",10,"E01","C",2,"Tim was extremely moved by the eight-part polyphony (八部合音) o"],["115-英文-11",115,"英文",11,"E02","B",2,"Customer: Hi, do you sell phone chargers? Clerk: Yes, over t"],["115-英文-12",115,"英文",12,"E02","B",2,"Jane: Did you go to the BLACKPINK concert? Tom: Nope. I was "],["115-英文-13",115,"英文",13,"E02","C",2,"Liz: I’m going to the supermarket to pick up two boxes of ma"],["115-英文-14",115,"英文",14,"E02","D",2,"Brian: I heard you’re learning Spanish. Is it hard? Lily: Ye"],["115-英文-15",115,"英文",15,"E02","A",2,"Peter: Gosh. I left my bottled water on my bike. Rose: For t"],["115-英文-16",115,"英文",16,"E02","C",2,"Mrs. Wu: I’m going shopping. Would you mind picking up Jimmy"],["115-英文-17",115,"英文",17,"E02","A",2,"Ming: Did you know the skills contest in Taipei last year? A"],["115-英文-18",115,"英文",18,"E02","B",2,"Ann: Hey, I’m writing my resume. What should I put first? Be"],["115-英文-19",115,"英文",19,"E02","C",2,"Dave: Grandma, you need to renew your driver’s license if yo"],["115-英文-20",115,"英文",20,"E02","B",2,"Willy: Did you hear that Dr. Jane Goodall (珍古德博士) passed awa"],["115-英文-21",115,"英文",21,"E03","A",2,""],["115-英文-22",115,"英文",22,"E03","D",2,""],["115-英文-23",115,"英文",23,"E03","A",2,""],["115-英文-24",115,"英文",24,"E03","C",2,""],["115-英文-25",115,"英文",25,"E03","B",2,""],["115-英文-26",115,"英文",26,"E03","A",2,""],["115-英文-27",115,"英文",27,"E03","A",2,""],["115-英文-28",115,"英文",28,"E03","D",2,""],["115-英文-29",115,"英文",29,"E04","A",2,"What did Elsa post on her blog?"],["115-英文-30",115,"英文",30,"E04","C",2,"According to the passage, what would Elsa probably do with h"],["115-英文-31",115,"英文",31,"E04","C",2,"According to the line chart, what is one trend in Taiwan’s e"],["115-英文-32",115,"英文",32,"E04","D",2,"According to the paragraph, which of the following are the c"],["115-英文-33",115,"英文",33,"E04","B",2,"According to the chart, which of the following is correct?"],["115-英文-34",115,"英文",34,"E04","B",2,"Which of the following is NOT mentioned as a reason that mak"],["115-英文-35",115,"英文",35,"E04","C",2,"Which is the correct order about Din Tai Fung’s business his"],["115-英文-36",115,"英文",36,"E04","D",2,"Which of the following is the best conclusion for the above "],["115-英文-37",115,"英文",37,"E04","D",2,"According to the passage, which of the following is true?"],["115-英文-38",115,"英文",38,"E04","C",2,"According to the passage, what would happen to children when"],["115-英文-39",115,"英文",39,"E04","B",2,"What is the passage mainly about?"],["115-英文-40",115,"英文",40,"E04","D",2,"According to the passage, which is NOT an important reason f"],["115-英文-41",115,"英文",41,"E04","D",2,"Which is closest in meaning to“ride the wave of change”in pa"],["115-英文-42",115,"英文",42,"E04","C",2,"According to the passage, which of the following is true?"]],"fixed":[{"subject":"國文","code":"C99","name":"寫作測驗","pts":{"110":24,"111":24,"112":24,"113":24,"114":24,"115":24}},{"subject":"英文","code":"E99","name":"非選擇題（填充、句子重組、中譯英）","pts":{"110":18,"111":16,"112":16,"113":16,"114":16,"115":16}}],"ex":{"110-國文-01":["(B)「出手闊輟」應作「出手闊綽」，形容花錢大方。(A) 佝僂、乾癟；(C) 丰姿、堆煙砌玉；(D) 削壁千仞、間關，都正確。","data/110-ch.json#110-國文-01.png",null],"110-國文-02":["「無出其右」的「出」是「超出、勝過」。(D)「其出人也遠矣」是聖人超出一般人很多，意義相同。(A) 日出是出現；(B)「出無車」是出門；(C)「朞年出之」是取出。","data/110-ch.json#110-國文-02.png",null],"110-國文-03":["「具答之」的「具」是「全部、詳盡」，指回答的範圍完整。(A)「甚」表程度；(C)「每」是每次；(D)「即」是立刻。","data/110-ch.json#110-國文-03.png",null],"110-國文-04":["(D) 前句主語是「參政魯公」，但「真宗遣使急召之，得於酒家」的主語換成真宗（及使者），後面「既入，問其所來」的「問」也是真宗，主語並非從頭到尾都是魯公。(A)(B)(C) 各句主語始終是秦伯、屈原、樊噲。","data/110-ch.json#110-國文-04.png",null],"110-國文-05":["本題選最不適當的。依圖，④ 是「登高題材」與「宋代文學」的交集（不屬散文）。蘇軾〈赤壁賦〉是宋代文賦，寫泛舟夜遊赤壁，並非登高題材，不符合 ④。其餘選項依題目設定的交集歸類都可成立。","data/110-ch.json#110-國文-05.png",null],"110-國文-06":["例句是「好位子」一詞有兩種意義（座位或職位）而造成誤解。(A)「沒用的東西」可指教學內容，也可是罵人的話，同樣是一詞多義。(B)(D) 是斷詞斷句不同（小心／肝、瓜分／地瓜）；(C) 是對風向命名的誤會。","data/110-ch.json#110-國文-06.png",null],"110-國文-07":["先點出對茄苳的特殊情感（④），再回憶小學（②）校門口的老茄苳（⑤），接著描寫茄苳的樹皮（③）與樹瘤（①），末句接「中空凹陷的樹幹」。","data/110-ch.json#110-國文-07.png",null],"110-國文-08":["本題選有誤解的。〈出師表〉「庶竭駑鈍，攘除姦凶」是諸葛亮自謙才能平庸，仍願竭盡心力討伐曹魏，是他自己的誓言，並非勸後主。(A) 情景移情；(C) 設問中的激問（無疑而問）；(D) 借助外物提升，都理解正確。","data/110-ch.json#110-國文-08.png",null],"110-國文-09":["孫將軍沒有大將軍的架勢，眼前「只是」一位清雅老人；臉色紅潤，「幾乎」沒有老態；你「也許」期待他不怒而威，結果「竟是」不笑時也和悅如微笑。","data/110-ch.json#110-國文-09.png",null],"110-國文-10":["本題選錯誤的。「到頭來我們所能理解的，不過是天上一顆星星的燦亮與隕落」以「到頭來……不過是」強調眾人的理解其實很有限、很表面，並非透澈真切。(A)(B)(C) 都正確。","data/110-ch.json#110-國文-10.png",null],"110-國文-11":["甲文說產婆須在學校受訓、取得畢業證書，乙文說先生媽「從未受過一定教育」，總督府因此培訓本島人助產婦。兩者主要差別是有無受過學校助產教育。(A)(B) 文中沒有這樣的區別；(D) 先生媽沒受過教育，助產婦講習招收的也是本島人。","data/110-ch.json#110-國文-11.png","data/110-ch.json#110-國文-g11.png"],"110-國文-12":["甲文說產婆在孕婦懷孕期間隔日來診，分娩時洗兒護母，謝金一圓到五六圓、富豪也不過二十餘金，可見照護從產前到分娩，費用由聘請者酌給。(A) 講習招收本島人以服務臺人；(B)(D) 文中沒有這些敘述。","data/110-ch.json#110-國文-12.png","data/110-ch.json#110-國文-g11.png"],"110-國文-13":["藤蘿是父親三十多年前親手栽種，父親過世二十多年，藤蘿依然茂盛，歷經家中人事變遷仍生生不息。(B) 藤蘿長在牆垣上，碧波是比喻；(C)「意思孤遠」是心境悠遠，不是想離群索居；(D) 藤蘿是作者用來追念父親。","data/110-ch.json#110-國文-13.png","data/110-ch.json#110-國文-g13.png"],"110-國文-14":["作者說藤蘿是先父手植，每次面對都肅然起敬，請周先生題「蘿棲」二字，「以寵其居，志不忘也」，是請對方體諒自己長久思念父親的心意。","data/110-ch.json#110-國文-14.png","data/110-ch.json#110-國文-g13.png"],"110-國文-15":["劉八駕車只求超越他人，完全不管馬的強弱、饑飽、生死。老闆要員工拚第一、不計較公司給多少資源，同樣只求成果而不顧對方的條件與負擔。","data/110-ch.json#110-國文-15.png","data/110-ch.json#110-國文-g15.png"],"110-國文-16":["劉八長期殘酷驅使馬匹，最後自己被車輪輾過而死，恰如「榮辱之來，必象其德」，所遭遇的榮辱與自身作為相應。(A) 資助敵人；(B) 推波助瀾；(D) 任人宰割，都不合文意。","data/110-ch.json#110-國文-16.png","data/110-ch.json#110-國文-g15.png"],"110-國文-17":["甲文批評教兒子學鮮卑語、彈琵琶來討好公卿的士大夫，以及「閹然媚於世者」；乙文寫楊再思跳高麗舞、吹捧張昌宗「蓮花似六郎」並為其脫罪。兩文都批評諂媚奉承的人。","data/110-ch.json#110-國文-17.png","data/110-ch.json#110-國文-g17.png"],"110-國文-18":["①「仕於亂世」與 ②「宴於司禮寺」的「於」都是「在」；③「昌宗於國有功否」的「於」是「對」。故 ①② 相同。","data/110-ch.json#110-國文-18.png","data/110-ch.json#110-國文-g17.png"],"110-國文-19":["乙文只記事，未直接評論，卻以「有識咸笑之」「天下名士，視再思如糞土也」表達作者的看法。(A) 兩文都不是作者親見；(B) 甲文肯定顏之推；(C) 三件事分別與張同休、張昌宗有關。","data/110-ch.json#110-國文-19.png","data/110-ch.json#110-國文-g17.png"],"110-國文-20":["甲文「水潺潺巉石間」寫溫泉在陡峭的巖石間流過。(B) 乙文說附近田園「多被泡傷」，是受害；(C) 只有甲文作者以手指試水溫；(D) 只有乙文寫到居民在溫泉洗浴。","data/110-ch.json#110-國文-20.png","data/110-ch.json#110-國文-g20.png"],"110-國文-21":["丙詩末句「浴罷倚欄舒望眼，龜峰聳峙對西峰」寫沐浴後倚欄遠眺山景，藉景表達浴後的舒暢。(A) 乙文只說明溫泉位置與情況，不是遊記；(B) 乙文沒有以人喻景；(C) 丙詩的對仗寫湯圍景象，並非今昔對比。","data/110-ch.json#110-國文-21.png","data/110-ch.json#110-國文-g20.png"],"110-國文-22":["本題選錯誤的。乙文的湯圍溫泉在宜蘭礁溪，依表屬碳酸氫鹽泉，陰離子以碳酸氫根離子為主。(A) 硫穴在陽明山，屬火成岩區；(C) 陽明山溫泉有刺鼻味，礁溪溫泉無味；(D) 兩處都形容泉水滾燙，水溫相近。","data/110-ch.json#110-國文-22.png","data/110-ch.json#110-國文-g20.png"],"110-國文-23":["乙圖有「出口總量」與「出口至日本總量」：② 1991 年銷日 4.4 萬公噸、2007 年剩 2 萬公噸，可由日本總量曲線印證；③ 2019 年外銷總量 38,915 公噸，可由出口總量印證。① 日本市占率、④ 出口金額，圖中都沒有資料。","data/110-ch.json#110-國文-23.png","data/110-ch.json#110-國文-g23.png"],"110-國文-24":["本題選不是原因的。臺糖提供的是荒廢的甘蔗田讓業者租用，並非技術轉移。(B) 租地大面積種植以機械化；(C) 中盤商轉型為農民，與加工業者合作；(D) 研發高產的「高雄 9 號」，都是脫困原因。","data/110-ch.json#110-國文-24.png","data/110-ch.json#110-國文-g23.png"],"110-國文-25":["精準農業以 AI 採收機、GPS、土壤感測器等蒐集數據，依不同區塊的狀況施肥、整地，即應用數據資訊、因地制宜。","data/110-ch.json#110-國文-25.png","data/110-ch.json#110-國文-g23.png"],"110-國文-26":["白居易 36 歲時租屋於新昌坊，50 歲買房也選新昌坊，原因之一是地段熟悉。(A) 渭北莊園是為投靠的母親而買，他並非任職下邽；(B) 他婚前（32 歲）就在常樂坊租屋；(D) 他是自請調職洛陽後才買到該宅院。","data/110-ch.json#110-國文-26.png","data/110-ch.json#110-國文-g26.png"],"110-國文-27":["① 資料只列各坊名稱，沒有說明哪裡較繁華，無法判斷；② 元和十一年白居易約 45 歲，在江州任司馬，50 歲才在長安買房，當時並沒有長安的自有住宅可出租，錯誤。","data/110-ch.json#110-國文-27.png","data/110-ch.json#110-國文-g26.png"],"110-國文-28":["契約說「一年內不得悔，先悔者罰銀錢捌拾文」，每月租金正是八十文，所以罰一個月租金。(A) 元和二年白居易 36 歲，租的是新昌坊；(B) 左拾遺是八品，依丙表只能三間五架；(C) 租金是每月一日、十五日各付四十文，分兩次付。","data/110-ch.json#110-國文-28.png","data/110-ch.json#110-國文-g26.png"],"110-國文-29":["白居易 50 歲升任中書舍人，為五品官，依丙表五品以上的堂舍上限是五間七架，(B) 最符合身分。(A) 五間九架是三品以上；(C) 三間五架是六、七品以下；(D) 三間四架是庶人。","data/110-ch.json#110-國文-29.png","data/110-ch.json#110-國文-g26.png"],"110-國文-30":["川久保玲的「破」是反對機械文明的一致與完美，追求返璞歸真。(A) 她的作品震驚時裝界，並非依隨主流；(B) 她標榜的是黑色極簡，不是色調斑駁；(D) 漲價的是她自己衣服的售價。","data/110-ch.json#110-國文-30.png","data/110-ch.json#110-國文-g30.png"],"110-國文-31":["「從零開始」對應「清貧」的哲學、「清心寡慾」與「返璞歸真」，最接近「齋心滌慮，回復本真」。","data/110-ch.json#110-國文-31.png","data/110-ch.json#110-國文-g30.png"],"110-國文-32":["「滿堂兮美人，忽獨與余兮目成」寫滿堂人中兩人目光相接、心意相通，承接「命中注定」的敘述，最適合「一見鍾情」。(B) 指親近女子；(C) 形容女子極美；(D) 形容詩文韻味深長。","data/110-ch.json#110-國文-32.png","data/110-ch.json#110-國文-g32.png"],"110-國文-33":["乙文說少司命祠「前臨汨羅江處搭起一座高臺」，「高臺對岸是祭壇」，人群圍在祭壇四周，秦王也在人群中遠遠看著。圖 (A) 少司命祠與高臺同在江的一岸，祭壇與秦王在對岸，最符合。","data/110-ch.json#110-國文-33.png","data/110-ch.json#110-國文-g32.png"],"110-國文-34":["① 甲文說〈少司命〉是巫對神的追求，乙文巫祝齊聲歌舞迎神，可推知詞句以巫祝口吻表達對神的傾慕，正確；② 乙文說大司命與少司命由「貴族男女扮演」，羋月與黃歇是分別率領女祝、男祝的巫祝，並非由黃歇扮演神，錯誤。","data/110-ch.json#110-國文-34.png","data/110-ch.json#110-國文-g32.png"],"110-國文-35":["本題選最不適當的。甲文的「她」喜愛此句，是因為它寫出命中注定的兩人在人群中相遇的美好，並非感傷愛情受命運擺布。(A)(C)(D) 的解讀都正確。","data/110-ch.json#110-國文-35.png","data/110-ch.json#110-國文-g32.png"],"110-國文-36":["地面部隊 4 月 28 日徒步出發，30 日天亮前抵達野放地點，約花兩天。(A) 趨避訓練由不同的陌生人進場執行；(C) 小熊在運輸籠中醒來後才搭機；(D) 小熊自己走出籠子後，才點鞭炮嚇牠遠離人類。","data/110-ch.json#110-國文-36.png","data/110-ch.json#110-國文-g36.png"],"110-國文-37":["① 四個月大走失，再經 280 天，野放時約 13 個月大，在 11～23 個月的適宜範圍，正確；② 4 月底是春末，山區野果充沛，又能在颱風季前探索環境，符合「季節」考量，正確。","data/110-ch.json#110-國文-37.png","data/110-ch.json#110-國文-g36.png"],"110-國文-38":["「牠是牠，我是我」表示人與小熊從此分開，放手讓牠回歸山林、自由生活，不再相見。(A) 大雨是為洗去人味；(B)「人間味」指人的氣味與親近人的習性；(C) 抹去足跡是希望小熊不再接觸人類，保持對人的警戒。","data/110-ch.json#110-國文-38.png","data/110-ch.json#110-國文-g36.png"],"110-英文-01":["句意：害羞的小男孩說話很「小聲」，我很難聽清楚。softly 輕聲地。bravely 勇敢地；clearly 清楚地；openly 公開地，都與聽不清楚矛盾。","data/110-en.json#110-英文-01.png",null],"110-英文-02":["句意：非常抱歉，請「接受」我誠摯的道歉。accept 接受。ignore 忽略；propose 提議；refuse 拒絕。","data/110-en.json#110-英文-02.png",null],"110-英文-03":["句意：我是那家餐廳的「常客」，每週至少去四五次。regular customer 常客。delicious 美味的；former 以前的；negative 負面的。","data/110-en.json#110-英文-03.png",null],"110-英文-04":["句意：洋芋片吃太多會口渴，因為洋芋片「含有」大量鹽分。contain 含有。control 控制；contract 簽約；contact 聯絡。","data/110-en.json#110-英文-04.png",null],"110-英文-05":["句意：夏天很熱，冬天卻很「冷」。chilly 寒冷的，與 hot 對比（while 表對比）。previous 先前的；tropical 熱帶的；visible 看得見的。","data/110-en.json#110-英文-05.png",null],"110-英文-06":["句意：洗手是保持健康、阻止「細菌」與病毒傳播的好方法。bacteria 細菌，與 viruses 並列。fever 發燒；moisture 濕氣；sweat 汗水。","data/110-en.json#110-英文-06.png",null],"110-英文-07":["句意：入學面試時，「申請者」常被問到為何想讀這所大學。applicant 申請者。associate 同事；receptionist 接待員；relative 親戚。","data/110-en.json#110-英文-07.png",null],"110-英文-08":["畫線字 companions 意為「同伴」，與 partners（夥伴）意思最接近。句意：貓狗等寵物是人類最喜愛的同伴。listener 聽眾；director 導演；stranger 陌生人。","data/110-en.json#110-英文-08.png",null],"110-英文-09":["畫線字 dip 意為「下降」，與 drop 同義。句意：氣象預報說氣溫會從白天 20 度降到晚上 12 度。dim 變暗；fail 失敗；leak 漏。","data/110-en.json#110-英文-09.png",null],"110-英文-10":["畫線字 primarily 意為「主要地」，與 mainly 同義。句意：許多早期美洲原住民偏好打獵，主要以野牛肉為生。barely 幾乎沒有；frequently 經常；scarcely 幾乎不。","data/110-en.json#110-英文-10.png",null],"110-英文-11":["畫線字 magnificent 意為「傑出的、了不起的」，與 brilliant 意思最接近。句意：居禮夫人是傑出的科學家，也是第一位獲諾貝爾獎的女性。believable 可信的；critical 批判的；commercial 商業的。","data/110-en.json#110-英文-11.png",null],"110-英文-12":["Anderson 問學英文最難的是什麼，Wan-Ting 接著說母語人士講太快、聽不懂，可知答案是「大概是聽力吧」。","data/110-en.json#110-英文-12.png",null],"110-英文-13":["顧客點糖醋排骨後，接著說「那我改點烤鴨」，可知店員說的是「抱歉，豬肉賣完了」。(C) 說沒有鴨，顧客就不會改點鴨。","data/110-en.json#110-英文-13.png",null],"110-英文-14":["丈夫回答「特價五折」，所以妻子問「買得划算嗎？」(Was it a good deal?)。","data/110-en.json#110-英文-14.png",null],"110-英文-15":["Ken 問附近有沒有藥局，Ann 聽完回應「喔不！怎麼了？」，可知 Ken 說「我覺得不舒服」。","data/110-en.json#110-英文-15.png",null],"110-英文-16":["店員回答「新臺幣 5,000 元」，是價錢，所以 Peter 問的是「一週的租金多少？」(What's the weekly rate?)。","data/110-en.json#110-英文-16.png",null],"110-英文-17":["Holly 說「我同意，那你也寄兩包烏龍茶給我吧」，可知 Ling 說的是「鳳梨酥配茶很對味」。","data/110-en.json#110-英文-17.png",null],"110-英文-18":["Pam 回答自己在電腦公司擔任日本與新加坡的業務代表，是在說明工作內容，所以陳女士問「能談談妳做什麼工作嗎？」。","data/110-en.json#110-英文-18.png",null],"110-英文-19":["Peter 錄取珠寶設計工作，接著說「選家餐廳，我請客」，前一句應是「我們去慶祝吧」。","data/110-en.json#110-英文-19.png",null],"110-英文-20":["醫生問失眠多久了，Lee 先生回答「從我開始新工作以來」，再說明每週工作約 80 小時。(A)(B) 答的是頻率，不是持續時間。","data/110-en.json#110-英文-20.png",null],"110-英文-21":["Johnny 回答「沒錯，我不會再這樣了」，可知老師問的是「你是不是每晚熬夜打電動？」，這是他上課睡覺的原因。","data/110-en.json#110-英文-21.png",null],"110-英文-22":["在德國朋友家吃飯要禮貌地把食物吃完，「否則」主人會以為你不喜歡這頓飯。or 否則。and 而且；but 但是；so 所以。","data/110-en.json#110-英文-22.png","data/110-en.json#110-英文-g22.png"],"110-英文-23":["主詞 Being noisy（動名詞，單數）「被認為」很無禮，用被動語態 is considered。","data/110-en.json#110-英文-23.png","data/110-en.json#110-英文-g22.png"],"110-英文-24":["後句說在巴基斯坦，客人被期待晚 15 分鐘到，所以你不會想要「準時」到。on time 準時。in time 及時；at a time 一次；for all time 永遠。","data/110-en.json#110-英文-24.png","data/110-en.json#110-英文-g22.png"],"110-英文-25":["前句說巴基斯坦客人應遲到，後句說丹麥人認為遲到不禮貌，兩者對比，用 In contrast「相反地」。","data/110-en.json#110-英文-25.png","data/110-en.json#110-英文-g22.png"],"110-英文-26":["around the world「世界各地」：世界各地有這麼多不同習俗，不可能全都知道。","data/110-en.json#110-英文-26.png","data/110-en.json#110-英文-g22.png"],"110-英文-27":["關係副詞 where 修飾表地點的 an area：「一個地震經常發生的地區」。","data/110-en.json#110-英文-27.png","data/110-en.json#110-英文-g27.png"],"110-英文-28":["make it possible for people to be warned：「使人們能夠被預警」，人是被警告的一方，用被動不定詞 to be warned。","data/110-en.json#110-英文-28.png","data/110-en.json#110-英文-g27.png"],"110-英文-29":["reduce 的受詞要用名詞，與 injuries 並列，用 deaths（死亡人數）。dies 是動詞；dead、deadly 是形容詞。","data/110-en.json#110-英文-29.png","data/110-en.json#110-英文-g27.png"],"110-英文-30":["選擇東海岸設置的原因是「因為」大多數地震發生在那裡。because 因為。if 如果；till 直到；unless 除非。","data/110-en.json#110-英文-30.png","data/110-en.json#110-英文-g27.png"],"110-英文-31":["along its entire length「沿著整條纜線」設有九個偵測點。along 沿著。","data/110-en.json#110-英文-31.png","data/110-en.json#110-英文-g27.png"],"110-英文-32":["本題選「不鼓勵」的。公告寫「What you find stays behind：貝殼和沙子要留在海灘上」，所以撿貝殼不被鼓勵。輕聲說話、了解規定、遠距拍鳥都符合原則。","data/110-en.json#110-英文-32.png","data/110-en.json#110-英文-g32.png"],"110-英文-33":["公告標題是「Leave No Trace（不留痕跡）」，各項原則都是要遊客不打擾、不帶走、不破壞，盡量讓自然保持原樣。","data/110-en.json#110-英文-33.png","data/110-en.json#110-英文-g32.png"],"110-英文-34":["Ju-Yi 讀動物科學系，又需要住處。廣告 B 是在養馬的農場工作，提供健保與住宿（housing provided），最適合。","data/110-en.json#110-英文-34.png","data/110-en.json#110-英文-g34.png"],"110-英文-35":["想當房屋銷售員，看廣告 C（不動產業）：須在上午 11 點到下午 5 點親自前往 Royal Estate 總公司應徵（Come in person）。","data/110-en.json#110-英文-35.png","data/110-en.json#110-英文-g34.png"],"110-英文-36":["WFP 因對抗飢餓、促進和平、防止以飢餓作為戰爭武器而獲獎，即保護人們免於飢餓與衝突。(A) WFP 是救助災民，並未終結戰爭與天災；(C) 是防止「以飢餓作為武器」。","data/110-en.json#110-英文-36.png","data/110-en.json#110-英文-g36.png"],"110-英文-37":["go hand in hand 意為「密切相關、相輔相成」，後句說不終止衝突就無法終結飢餓，故與 are connected 最接近。","data/110-en.json#110-英文-37.png","data/110-en.json#110-英文-g36.png"],"110-英文-38":["2010 年 WFP 在中亞協助兩國邊境村莊重建共用的供水系統，透過合作化解了衝突。(A) 是校園供餐計畫照顧 1700 萬名兒童，不是兒童工作換餐；(B) 是 WFP 人員把麵粉送給需要的人；(D) 12,000 人是地震死亡人數。","data/110-en.json#110-英文-38.png","data/110-en.json#110-英文-g36.png"],"110-英文-39":["文章介紹自動駕駛車的原理、好處，以及雖未如預期在 2020 年普及，但不久的將來會上路，主旨是自動駕駛車即將到來。","data/110-en.json#110-英文-39.png","data/110-en.json#110-英文-g39.png"],"110-英文-40":["文中說自動駕駛車需要連接多個攝影機的電腦來追蹤周圍物體，並給電腦所有駕駛規則與路線，即攝影機、電腦、駕駛規則與道路地圖。文中沒有提到喇叭。","data/110-en.json#110-英文-40.png","data/110-en.json#110-英文-g39.png"],"110-英文-41":["文中說原本預估 2020 年自動駕駛車會成為標準，實際上只有少數研究用車上路，技術仍在研究與改進中，即處於研究階段。","data/110-en.json#110-英文-41.png","data/110-en.json#110-英文-g39.png"],"111-國文-01":["(A)「誨澀」應作「晦澀」，指隱晦艱澀；「低彌」應作「低迷」。(B) 嗥、怵惕；(C) 疲憊、意興闌珊；(D) 焦灼，都正確。","data/111-ch.json#111-國文-01.png",null],"111-國文-02":["「故態復萌」與「餘人各復延至其家」的「復」都是「又、再」。(A)「少不更事」的更是經歷，「洗盞更酌」的更是再；(B)「深根固本」的固是鞏固，「名我固當」的固是本來；(D)「正直敢言」的敢是勇於，「敢以煩執事」的敢是謙詞「冒昧」。","data/111-ch.json#111-國文-02.png",null],"111-國文-03":["讀者偏好書法筆勢與文意互相輝映，填「相映成趣」；活字印刷無法呈現書法風格，自然不受青睞，填「不得垂青」。「過從甚密」指人往來頻繁；「一息尚存」指還有一口氣，都不合文意。","data/111-ch.json#111-國文-03.png",null],"111-國文-04":["先說魚塘的限制：魚苗取得不易，「② 以及須克服水源補充問題，⑤ 故養殖活動得依附水稻農業生態體系，① 因此大多僅是農家副業」；再轉說魚塭：「③ 反觀魚塭雖侷限在臺灣西南沿海，④ 卻是適合環境條件的土地利用方式」，接末句「遂發展為重要的養殖型態」。","data/111-ch.json#111-國文-04.png",null],"111-國文-05":["例句以不同性質的「人心」與「潮水」相比。(D) 以飛魚飛越的「距離」與「歡呼聲」的持久相比，兩者性質不同，手法相似。(A) 人與人比收入；(B) 頭髮與頭髮比；(C) 人與人比品行，都是同類事物相比。","data/111-ch.json#111-國文-05.png",null],"111-國文-06":["被廢止的是「T 市政府會議管理系統作業規定」，第一格指該規定中有關文書處理的條文，第二格指該規定自 2 月 1 日起廢止，兩格都填「規定」。「系統」已下線，「要點」是另一份可遵照的文件。","data/111-ch.json#111-國文-06.png",null],"111-國文-07":["本題選不適當的。「盡量」語氣不夠肯定，應改為「應」或「務必」請合格技術士施作；「全權」是把權力完全交付他人，用在這裡不通順。(A)(B)(C) 的診斷與修改都正確。","data/111-ch.json#111-國文-07.png",null],"111-國文-08":["漁父主張「聖人不凝滯於物，而能與世推移」，蘇子說「自其變者而觀之……自其不變者而觀之」，兩人都會同意順應現實、找到平衡、相對觀點、泰然處之（第 1、2、3、5 題約各 4 分），而不同意堅守固定原則（第 4 題約 1 分），總分都約 13～18。","data/111-ch.json#111-國文-08.png",null],"111-國文-09":["「典範長存」是用於悼念逝者的輓辭，不能用來祝賀升官或獲選最佳球員。(A)「出類拔萃」可賀比賽優勝與最佳球員；(C)「鶯遷喬木」可賀升官與搬新家；(D)「和氣致祥」可賀搬新家與新店開幕。","data/111-ch.json#111-國文-09.png",null],"111-國文-10":["甲「開車時，則發票」：在某條件下就做某事，「則」相當於「就」（①）；乙「一則……二則……」用來逐項解釋理由，「則」相當於「是」（③）。","data/111-ch.json#111-國文-10.png",null],"111-國文-11":["作者的表中列出「昔之所重而今當痛改者」，句法中有「不合論理學」，可見他要求學生句法合乎論理學。(A) 他教的是應用文；(B) 字法、句法、章法都要改正；(D) 只要改掉「不合義理之典故」，並非一概不用典故。","data/111-ch.json#111-國文-11.png","data/111-ch.json#111-國文-g11.png"],"111-國文-12":["① 作者以家常便飯、走路比喻應用文，批評學生只會寫濫調文章而不能寫家信、公文，可見教學不宜專重文學文，符合；② 表中說應用文甲項（字義、文法、論理學，即「通」）重於乙項（文彩、老練），符合。","data/111-ch.json#111-國文-12.png","data/111-ch.json#111-國文-g11.png"],"111-國文-13":["劉半農的應用文是相對於詩歌、小說、戲曲等純文學的實用文章。《紅樓夢》是小說，屬文學文，最不可能列為教材。(A) 奏疏、(B) 科技著作、(D) 收費章程都是實用文章。","data/111-ch.json#111-國文-13.png","data/111-ch.json#111-國文-g11.png"],"111-國文-14":["日記寫「申刻北風甚大，遂雨，有雷，傍晚霽」，申刻是下午三到五點，可知午後有雷陣雨。(B) 是雨停後才去看荷；(C) 是走田埂時失足，雙腳踝陷入水中，不是半身；(D) 他向種花人「乞花三枝、蓮蓬一枝」。","data/111-ch.json#111-國文-14.png","data/111-ch.json#111-國文-g14.png"],"111-國文-15":["作者知道「鄉人種藕，以不花為豐年」，花多則藕瘦，看到滿田荷花如雪，便想到這對賞花的人很好，「鄉人得無怨乎」，猜想鄉人恐為蓮藕歉收而苦惱。","data/111-ch.json#111-國文-15.png","data/111-ch.json#111-國文-g14.png"],"111-國文-16":["華德發現密封玻璃罐中「白天水汽蒸發，凝結於玻璃上，晚上冷卻後回到土壤」，水分循環使植物存活。(A) 他是為了保護盆栽免受空氣汙染；(B) 上古只是開始製作玻璃器皿；(D) 華德箱讓「活體植株」能長途運送。","data/111-ch.json#111-國文-16.png","data/111-ch.json#111-國文-g16.png"],"111-國文-17":["文中說利用華德箱運送金雞納樹到印度大量種植，提煉奎寧，「沒有金雞納樹，歐洲對非洲的殖民幾乎不可能」，說明這個玻璃箱改變了世界的生態與政局。","data/111-ch.json#111-國文-17.png","data/111-ch.json#111-國文-g16.png"],"111-國文-18":["1851 年福鈞帶著 6 名中國製茶專才與 2 名製茶葉罐的工匠前往印度。(A) 1790～1819 年茶葉只占 88%～93%；(B) 阿薩姆原本就產茶，只是品質不理想；(C) 福鈞曾旅居中國，並非長住香港。","data/111-ch.json#111-國文-18.png","data/111-ch.json#111-國文-g18.png"],"111-國文-19":["信中說將安排半島東方公司的輪船，希望福鈞在 6 月 20 日前動身，信的日期是 5 月 17 日，約一個月後啟程。(A) 只說目標，沒有完成期限；(C) 只說年薪 500 英鎊，沒有比較；(D) 只支付董事會認為有利拓展茶園的開銷，並非所有開銷。","data/111-ch.json#111-國文-19.png","data/111-ch.json#111-國文-g18.png"],"111-國文-20":["第一次以布袋包裹種子運送，種子全軍覆沒，茶苗也只剩少數存活；第二次才讓種子在華德箱中發芽，運送成功。(A) 他雇了兩名僕人同行；(B) 他第一次來中國時就知道紅茶與綠茶是同一種植物；(C) 他只在香港目送華德箱出海。","data/111-ch.json#111-國文-20.png","data/111-ch.json#111-國文-g18.png"],"111-國文-21":["① 1848 年 9 月從上海出發，約兩個月後到安徽，10 月在途中，相符；③ 1849 年農曆新年前回上海，再送往香港上船，約 1 月出海、3 月抵加爾各答，相符。② 1849 年 2 月他已離開安徽；④ 文中沒有 1850 年 6 月拜訪製茶師的記載；⑤ 前往武夷山是 1849 年 5 月。","data/111-ch.json#111-國文-21.png","data/111-ch.json#111-國文-g18.png"],"111-國文-22":["西廂的手一直不縮，直到拿了兩貫錢才「頓縮」，顯出貪得無厭、急於占有的醜態。(A) 西廂是典史，東廂是饑民，不是主僕；(B) 東廂饑民拿一文錢就縮手；(C) 東廂是錢已滿足心願。","data/111-ch.json#111-國文-22.png","data/111-ch.json#111-國文-g22.png"],"111-國文-23":["陳景初見饑民的手焦瘦、典史的手肥白，又見典史非兩貫錢不縮手，移燈查看前感到驚訝，填「訝」；看清棺上字樣後，發出「饑民無大志……四公慣受書儀」的感歎，填「歎」。","data/111-ch.json#111-國文-23.png","data/111-ch.json#111-國文-g22.png"],"111-國文-24":["西廂棺木中是「某縣典史」，生前「慣受書儀」（習慣收受賄賂），死後仍非足額不收，作者藉此感慨縣衙小吏貪財成性。","data/111-ch.json#111-國文-24.png","data/111-ch.json#111-國文-g22.png"],"111-國文-25":["留言談到鋸架的剛性、拉力、耐用度影響效率（材料屬性），以及依人體工學改變握把形狀，可知改良手工具可從材料屬性或人體工學著手。(A) 文中沒說首創分類；(B) 有人說上古就有鋸子，沒有確認魯班發明；(C) 粗齒鋸可鋸大木料。","data/111-ch.json#111-國文-25.png","data/111-ch.json#111-國文-g25.png"],"111-國文-26":["① 業者九成是員工 50 人以下的小廠，以「品牌代工＋協力廠」接力合作，屬中小企業且互助，正確；② 文中只說全球最大出口國是中國，臺灣中高階手工具市占第一，沒有提出口值排名，無法判斷。","data/111-ch.json#111-國文-26.png","data/111-ch.json#111-國文-g25.png"],"111-國文-27":["本題選錯誤的。表中美國 40.6% 是指臺灣手工具出口到美國的金額占臺灣總出口的比重，不是美國有 40.6% 的手工具從臺灣進口。(A)(B)(D) 都符合表中數據。","data/111-ch.json#111-國文-27.png","data/111-ch.json#111-國文-g25.png"],"111-國文-28":["「人不負礦，礦究何負於人」是說只要人善加籌劃、廣開銷路，礦產就能帶來利益，即「煤盡其用，民享其利」。","data/111-ch.json#111-國文-28.png","data/111-ch.json#111-國文-g28.png"],"111-國文-29":["甲文說臺灣炊爨、禦寒都不用煤，「除出口外，別無銷路」，主張以外銷為主；乙文批評存煤不銷、坐視煤質變壞，主張「及時運籌……廣其銷路」，積極促銷。甲文擔心的是大陸各省煤價上漲，不是臺煤滯銷。","data/111-ch.json#111-國文-29.png","data/111-ch.json#111-國文-g28.png"],"111-國文-30":["本題選最不適當的。「人不負礦，礦究何負於人？」是反問句，答案就在問題中（礦不會辜負人），不是真的向人徵求答案。(A)(B)(C) 的解說都正確。","data/111-ch.json#111-國文-30.png","data/111-ch.json#111-國文-g28.png"],"111-國文-31":["唐太宗主張曲直長短「各有所施」，特雷默主張「授予相應的職務」，兩人都主張依才能安排適合的職位，即適才適所。","data/111-ch.json#111-國文-31.png","data/111-ch.json#111-國文-g31.png"],"111-國文-32":["劉基說取材「惟其良」，各種木材都收，但「非空中而液身者」（中空、腐爛的不用），無所不用的前提是材質良好。唐太宗則說「無棄材」，沒有這層篩選的考量。","data/111-ch.json#111-國文-32.png","data/111-ch.json#111-國文-g31.png"],"111-國文-33":["本題選最不適當的。彼得原理指出「按績效或年資決定升遷」，正是員工升到不適任位置的原因。要減少專長與職務不相應，應依專長安排職務，而不是按績效或年資升遷。","data/111-ch.json#111-國文-33.png","data/111-ch.json#111-國文-g31.png"],"111-國文-34":["依示意圖，專長不變而績效好就被升遷，終會升到專長不足以勝任的位置，① 合理；員工若想往高階發展，必須擴充專長，才能在新職位上勝任，② 合理。","data/111-ch.json#111-國文-34.png","data/111-ch.json#111-國文-g31.png"],"111-國文-35":["狄仁傑推測真智在玉鏡的茶中下毒，可明確得知他認為玉鏡遭毒殺。(B) 真智喝茶後就離開；(C) 真智已墜崖，沒有坦承；(D) 文中只寫孫天師神色可疑，並未明說他殺人滅口。","data/111-ch.json#111-國文-35.png","data/111-ch.json#111-國文-g35.png"],"111-國文-36":["孫天師「臉色慘白」「盯著狄公」「臉上有些惱意」「捂著眼睛，不看狄公」，這些不尋常的神情暗示他與案情有關，為下文預作鋪墊。","data/111-ch.json#111-國文-36.png","data/111-ch.json#111-國文-g35.png"],"111-國文-37":["本題選最不適當的。文中寫上樓到露臺、進書房的移動，主要是交代事件經過，沒有藉移動路線與景物描寫來襯托人物性格差異。(A)(B)(C) 的分析都正確。","data/111-ch.json#111-國文-37.png","data/111-ch.json#111-國文-g35.png"],"111-國文-38":["① 吳丞相由花與貓眼的狀態，判斷畫中是正午時分，推斷的是畫中景物的時間，正確；② 狄仁傑由畫中貓瞳仁很大，判斷「作畫時間絕非如真智所言」，是以畫中景物的時間當作作畫時間，正確。","data/111-ch.json#111-國文-38.png","data/111-ch.json#111-國文-g35.png"],"111-英文-01":["句意：我們最好早點出發以「避開」車潮，準時到家。avoid 避免。drop 掉落；invite 邀請；mind 介意。","data/111-en.json#111-英文-01.png",null],"111-英文-02":["句意：Anny 的孫子總是充滿「活力」，每天都想去公園。be full of energy 精力充沛。hurry 匆忙；identity 身分；safety 安全。","data/111-en.json#111-英文-02.png",null],"111-英文-03":["句意：我最近胖了很多，這些牛仔褲太「緊」穿不下了。tight 緊的。loose 寬鬆的（與發胖矛盾）；ripe 成熟的；swift 迅速的。","data/111-en.json#111-英文-03.png",null],"111-英文-04":["句意：老闆完全接受我的建議，一直點頭「表示」他完全同意。indicate 表示、顯示。deny 否認；excuse 原諒；forget 忘記。","data/111-en.json#111-英文-04.png",null],"111-英文-05":["句意：為了保護頭部，騎機車必須戴「安全帽」。helmet 安全帽。beard 鬍子；necklace 項鍊；tie 領帶。","data/111-en.json#111-英文-05.png",null],"111-英文-06":["句意：David「天生的」髮色是棕色，但他最近染成紫色。natural 天生的、自然的，與 dyed 對比。ancient 古老的；historical 歷史的；opposite 相反的。","data/111-en.json#111-英文-06.png",null],"111-英文-07":["句意：我們按計畫「提前」訂到春節車票，一開賣就訂位。ahead 提前。almost 幾乎；either 也（否定）；even 甚至。","data/111-en.json#111-英文-07.png",null],"111-英文-08":["句意：為了紓壓，洪先生決定聽睡前音樂來「放鬆」。for relaxation 為了放鬆。presentation 簡報；publication 出版；reputation 名聲。","data/111-en.json#111-英文-08.png",null],"111-英文-09":["畫線字 pursued 意為「追捕」，與 chased 同義。句意：警察昨晚在街上追捕銀行搶匪。beg 乞求；praise 稱讚；treat 對待。","data/111-en.json#111-英文-09.png",null],"111-英文-10":["畫線字 extensively 意為「廣泛地、徹底地」，與 thoroughly 意思最接近。句意：我徹底查過紀錄，但找不到你說的那個人。eventually 最終；marginally 些微地；occasionally 偶爾。","data/111-en.json#111-英文-10.png",null],"111-英文-11":["兒子回答「抱歉，我昨天把一整瓶喝光了」，可知爸爸要的是可以「喝」的牛奶：「我需要兩杯牛奶」。麵粉、奶油不會用「喝」。","data/111-en.json#111-英文-11.png",null],"111-英文-12":["Tina 回答「不用了，謝謝，我真的很飽」，可知 Judy 問的是「妳確定不想吃點什麼嗎？」。","data/111-en.json#111-英文-12.png",null],"111-英文-13":["Ken 接著說明要戴上頭戴裝置、開啟遊戲後會感覺置身其中，是在解釋運作方式，所以 Ann 問「那是怎麼運作的？」。","data/111-en.json#111-英文-13.png",null],"111-英文-14":["Ted 擔心 Sue 很久沒跑會累，Sue 回答「別擔心我，走吧」。(C)(D) 與 Sue 想繼續跑的態度矛盾；(B) cover your tracks 是湮滅蹤跡。","data/111-en.json#111-英文-14.png",null],"111-英文-15":["Alice 回答「我想六月去」，是時間，所以業者問「您打算什麼時候出遊？」。","data/111-en.json#111-英文-15.png",null],"111-英文-16":["Ann 回答「才不是，很多大人也喜歡動畫，就像小孩一樣」，可知 Dan 問的是「那不是給小孩看的嗎？」。","data/111-en.json#111-英文-16.png",null],"111-英文-17":["行員接著說「他在二樓」，「他」指前句提到的人，所以前一句是「貸款部門的經理可以協助您」。","data/111-en.json#111-英文-17.png",null],"111-英文-18":["丈夫說喜歡附免費停車位的公寓，妻子回應「但我們沒有車」，再說明靠近車站的那間可搭火車上班又便宜。","data/111-en.json#111-英文-18.png",null],"111-英文-19":["Kelly 說她很累，只想去海邊什麼都不做，所以她喜歡的是「懶散的假期」。Tim 接著說他喜歡到處參觀，形成對比。","data/111-en.json#111-英文-19.png",null],"111-英文-20":["經理說「稍等……有，我這裡有您的訂位」，可知 White 先生說的是「我用 James White 的名字訂了今晚的位子」。","data/111-en.json#111-英文-20.png",null],"111-英文-21":["The answer depends on whom you ask：「答案取決於你問『誰』」，ask 的受詞用 whom。","data/111-en.json#111-英文-21.png","data/111-en.json#111-英文-g21.png"],"111-英文-22":["前句說電腦技能對每個孩子都很重要，「因此」孩子應在小學前就開始使用電腦。Therefore 因此。Instead 反而；Nonetheless 儘管如此；Otherwise 否則。","data/111-en.json#111-英文-22.png","data/111-en.json#111-英文-g21.png"],"111-英文-23":["have an effect on 對……有影響：電腦可能對兒童心智發展有負面影響。","data/111-en.json#111-英文-23.png","data/111-en.json#111-英文-g21.png"],"111-英文-24":["孩子沒有充分運用想像力，「因為」電腦螢幕把一切都呈現出來了。because 因為。or 或；so that 以便；rather than 而不是。","data/111-en.json#111-英文-24.png","data/111-en.json#111-英文-g21.png"],"111-英文-25":["主詞是 the best way（單數），動詞用 is：「最好的方式是每天只用一小段時間」。to use computers 是修飾 way 的不定詞片語。","data/111-en.json#111-英文-25.png","data/111-en.json#111-英文-g21.png"],"111-英文-26":["connect with 與……連結：幫助年輕人與父母的家鄉國家產生連結。","data/111-en.json#111-英文-26.png","data/111-en.json#111-英文-g26.png"],"111-英文-27":["about 180,000 foreign persons (who are) married to Taiwanese citizens：「嫁娶臺灣人的約 18 萬名外籍人士」，用過去分詞 married 修飾前面名詞。","data/111-en.json#111-英文-27.png","data/111-en.json#111-英文-g26.png"],"111-英文-28":["文章開頭說有「兩個」計畫，前面介紹了 One of the projects，第二個就用 The other project「另一個」。","data/111-en.json#111-英文-28.png","data/111-en.json#111-英文-g26.png"],"111-英文-29":["前句說計畫安排參訪東南亞的臺商公司，接著舉越南「為例」，說它得到最多臺灣投資。for example 例如。","data/111-en.json#111-英文-29.png","data/111-en.json#111-英文-g26.png"],"111-英文-30":["這些公司聘用臺灣新員工時，會「尋找」能適應越南文化的人。look for 尋找。get off 下車；get over 克服；look after 照顧。","data/111-en.json#111-英文-30.png","data/111-en.json#111-英文-g26.png"],"111-英文-31":["依折線圖，2021 年 5 月約有 30 間房被入住。每間房只住一人，所以約 30 位房客。","data/111-en.json#111-英文-31.png","data/111-en.json#111-英文-g31.png"],"111-英文-32":["2020 年 4 月約有 45 間房被入住，超過 40 間。(A) 2021 年 7 月約 46 間，並未全滿 70 間；(B) 2021 年 6 月約 40 間有人住，空房約 30 間；(C) 2020 年的折線大多高於 2021 年，2020 年隔離人數較多。","data/111-en.json#111-英文-32.png","data/111-en.json#111-英文-g31.png"],"111-英文-33":["比賽主題是「Karano High School — A Special Place!」，描述你喜愛這所學校的地方與在此就學的感受，即拍一支關於學校對自己有多特別的短片。(D) 影片長度一分鐘，但內容不是拍校慶。","data/111-en.json#111-英文-33.png","data/111-en.json#111-英文-g33.png"],"111-英文-34":["規則寫明影片必須原創，使用素材須合法（use of material must be permitted by law）。(A) 只限在校生；(B) 評分還包括主題呈現；(C) 截止日是 2022 年 9 月 30 日，12 月 1 日是公布結果。","data/111-en.json#111-英文-34.png","data/111-en.json#111-英文-g33.png"],"111-英文-35":["Jim 說「在四週志工之旅結束時」要去馬丘比丘，可知他在庫斯科待約四週。(A) 人口 35 萬，3,400 是海拔公尺數；(B) 他週一至週六去學校，一週六天；(D) 搭火車約三小時，不是步行。","data/111-en.json#111-英文-35.png","data/111-en.json#111-英文-g35.png"],"111-英文-36":["Molly 在信中說她的藝術之旅從巴黎羅浮宮開始，「我們現在在這裡」看達文西的展覽，明天才去倫敦。所以寫信時她在巴黎。","data/111-en.json#111-英文-36.png","data/111-en.json#111-英文-g35.png"],"111-英文-37":["Jim 說他和寄宿家庭說西班牙語，又在學校教英語，可推知他會說西班牙語與英語。(B) 欣賞達文西的是 Molly；(C) Molly 原本擔心他不適應；(D) 信中沒有比較兩間博物館。","data/111-en.json#111-英文-37.png","data/111-en.json#111-英文-g35.png"],"111-英文-38":["文章說明什麼是碳捕捉、利用與封存（CCUS）、它的步驟、困難與發展現況，目的是讓讀者了解 CCUS。(B) 文章並未反對；(C) 新計畫只是其中一部分。","data/111-en.json#111-英文-38.png","data/111-en.json#111-英文-g38.png"],"111-英文-39":["CCUS 的步驟是先從煙囪捕捉二氧化碳，再以管線送到可以儲存或利用的地方，即「捕捉後儲存或利用」。","data/111-en.json#111-英文-39.png","data/111-en.json#111-英文-g38.png"],"111-英文-40":["文中說二氧化碳若儲存在地下，就不會加劇氣候危機，目的是抑制全球暖化。(A)(B) 溫室植物與汽水是「利用」的例子，不是放到地下的原因。","data/111-en.json#111-英文-40.png","data/111-en.json#111-英文-g38.png"],"111-英文-41":["gain momentum 指「取得進展、發展加速」，後句說過去三年其他國家已啟動 30 個新計畫，故與 progress（進展）最接近。","data/111-en.json#111-英文-41.png","data/111-en.json#111-英文-g38.png"],"111-英文-42":["第二段說 CCUS 在其他國家發展加速，國際能源署也說需要更多計畫，可推知使用 CCUS 的國家可能增加。(A) 沒說要停止；(C) 封存場維護是問題而非好處；(D) 文中說目前計畫還不夠。","data/111-en.json#111-英文-42.png","data/111-en.json#111-英文-g38.png"],"112-國文-01":["(B)「朵飴稱快」應作「朵頤稱快」，「大快朵頤」指痛快地飽餐一頓。(A) 粼粼、茸茸；(C) 惠風和暢、阡陌；(D) 舳艫相繼、帆檣絡繹，都正確。","data/112-ch.json#112-國文-01.png",null],"112-國文-02":["「肯綮」指筋骨結合處，比喻事物的要害、關鍵，典出《莊子‧養生主》〈庖丁解牛〉「技經肯綮之未嘗」。","data/112-ch.json#112-國文-02.png",null],"112-國文-03":["「革退不用」的「不用」是「不任用」。(A)「若不用陸伯言」也是不任用陸遜，意義相同。(B)(C)(D) 的「不用」都是「不必、不需要」。","data/112-ch.json#112-國文-03.png",null],"112-國文-04":["甲「南極瀟湘」意為向南直到瀟湘，「極」是動詞「窮盡、到達盡頭」（②）；乙「是極」意為「很對」，「極」是副詞「很、非常」（③）。","data/112-ch.json#112-國文-04.png",null],"112-國文-05":["「何其始造舟車者，不食尸祝之報也」以「何其……也」的反問語氣，慨歎首創舟車的人竟然沒有得到祭祀報答。(A) 是謙虛的詢問；(B) 是陳述利害；(C) 是設問，下文自答。","data/112-ch.json#112-國文-05.png",null],"112-國文-06":["例句把人的動作「伸入」「糾纏」轉用在柳絲上，屬轉化（擬人）。(B)「暮色已乘細細的雨絲自四面八方圍攏來」，暮色像人一樣乘著雨絲圍攏，手法相同。(A) 是一般敘述；(C) 是譬喻；(D) 是描寫髮型的變化。","data/112-ch.json#112-國文-06.png",null],"112-國文-07":["看見父親專注削木的功夫，心生崇敬而覺得自己不如，填「自慚形穢」；清脆聲響與鳥鳴令人愉悅，填「心曠神怡」；在山中不要左顧右盼，以免被惡靈認出是新手，填「東張西望」。","data/112-ch.json#112-國文-07.png",null],"112-國文-08":["(B)「我們全家人都深愛著她，並且是最療癒的開心果」前半主語是「我們全家人」，後半「是最療癒的開心果」的主語應是「她」，主語前後不一致，語法有缺失。","data/112-ch.json#112-國文-08.png",null],"112-國文-09":["契約句子先寫例外條件：「⑤ 除有正當理由無法向警察機關報案，③ 或非屬警察機關受理之情形外」，再寫義務：「① 乙方應立即報案，② 並於通知甲方後，④ 將機車送雙方合意廠修理」，接末句「如無法合意，則送原廠修理」。","data/112-ch.json#112-國文-09.png",null],"112-國文-10":["本題選不適當的。蘇軾的詞雖被認為不完全拘守音律，但仍可入樂歌唱，「完全無法入樂演唱」與事實不符。(A) 李清照為婉約派代表、蘇軾為豪放派代表；(C) 戴笠穿屐的形象可呼應蘇軾豁達面對困境；(D) 李清照聞花惜春的畫面符合其細膩溫婉的詞風。","data/112-ch.json#112-國文-10.png",null],"112-國文-11":["依甲文，魯迅透過不可信賴的敘事者進行三重諷刺：孔乙己執著過時的價值觀，看客與敘述者也同樣可憐、缺乏真正的衡量意識。作者看見孔乙己的偏狹，也看見眾人的蒙昧。(A) 文中沒有小夥計受欺壓；(B) 眾人嘲笑他連秀才都撈不到；(D) 小夥計也跟著附和眾人取笑。","data/112-ch.json#112-國文-11.png","data/112-ch.json#112-國文-g11.png"],"112-國文-12":["甲文說孔乙己依附傳統價值與斯文人的行為習慣，「支撐著他可憐的存在」。① 對嘲笑者顯出不屑置辯的神氣，是讀書人的自尊；② 窘迫時滿口之乎者也，是斯文人的習慣。兩者都適合作為例子。","data/112-ch.json#112-國文-12.png","data/112-ch.json#112-國文-g11.png"],"112-國文-13":["依框中說明，不可信賴的敘事者所說的不是作者的實話。小夥計成年後回憶仍帶嘲諷、鄙視孔乙己，魯迅真正要讀者看見的，是這種冷漠輕蔑的可悲，進而反省。","data/112-ch.json#112-國文-13.png","data/112-ch.json#112-國文-g11.png"],"112-國文-14":["甲文認為孔乙己可憐，是因他「執著於當時已不再被珍視的過去的價值觀」。勸慰他「我們總以為是過去抓著我們，其實是我們自己抓著過去不放」最切合。其他選項分別談慾望、討好他人、面對嫉妒，與原因無關。","data/112-ch.json#112-國文-14.png","data/112-ch.json#112-國文-g11.png"],"112-國文-15":["本題選無法讀到的。文中只說銘福位在高雄，沒有指出在高雄的什麼地點。(B) 文末寫澳洲政府核發執照、歡迎設廠；(C) 城市礦山即從廢車中回收有價金屬；(D) 文中說明回收可再利用九成、可煉出鋰電池原料等價值。","data/112-ch.json#112-國文-15.png","data/112-ch.json#112-國文-g15.png"],"112-國文-16":["兩處引述業者的話：「計劃在臺南蓋汽電共生廠……廢轉能」「『城市採礦』是可行的解方」，都是業者對自身規劃與產業未來趨勢的看法。","data/112-ch.json#112-國文-16.png","data/112-ch.json#112-國文-g15.png"],"112-國文-17":["第二段先介紹銘福「現在」的處理能力，第三段回溯 1970 年代從廢五金回收起家、拆船業沒落後轉向廢車與家電，讓讀者了解業者的發跡與轉型歷程。","data/112-ch.json#112-國文-17.png","data/112-ch.json#112-國文-g15.png"],"112-國文-18":["本題選錯誤的。望月義想生於 1722 年、卒於 1804 年，而《瓶史國字觧》的序寫於文化 5 年（1808），寫序的是藤雲齋（望月義達），不是望月義想。","data/112-ch.json#112-國文-18.png","data/112-ch.json#112-國文-g18.png"],"112-國文-19":["《瓶史》說「花之所謂整齊者，正以參差不倫，意態天然」，枝葉對稱、紅白相配反而像墓門華表，可見宏道流認為美感來自參差。(A) 主張不可太繁也不可太瘦；(C) 主張「如畫苑布置，方妙」；(D) 認為整齊並非對稱。","data/112-ch.json#112-國文-19.png","data/112-ch.json#112-國文-g18.png"],"112-國文-20":["《瓶史》說「多不過二種三種，高低疏密」，《瓶花譜》說「欲插二種，須分高下合插」，兩者都主張用兩種以上花材時要高低搭配。(A)「瘦巧」指小瓶插花，不是瓶身；(B)《瓶花譜》也用麻絲縛定；(C)「墓門華表」是《瓶史》對過度對稱的批評，不是說樹枝。","data/112-ch.json#112-國文-20.png","data/112-ch.json#112-國文-g18.png"],"112-國文-21":["① 甲圖只用梅與水仙兩種花材，置瓶不呆板、沒有用繩束縛，符合《瓶史》「多不過二種三種」與置瓶的觀點，正確。② 乙圖富士松與菊高出花瓶甚多，不符合《瓶花譜》「令花稍高於瓶」的花與瓶相稱，錯誤。","data/112-ch.json#112-國文-21.png","data/112-ch.json#112-國文-g18.png"],"112-國文-22":["依罰則二，殺傷他人豬羊等畜須賠償減價；價不減者笞三十。可知傷他人馬牛以外的畜產，須賠償損失或受笞。(A) 傷而不堪乘用只笞五十，沒有徒刑；(B) 罰則並非以笞代替賠償；(D) 犬是「任犬殺傷」的情形，不是被殺的畜產等級。","data/112-ch.json#112-國文-22.png","data/112-ch.json#112-國文-g22.png"],"112-國文-23":["小吳的惡犬咬死小周的羊，但羊仍值原價，依罰則三「任犬殺傷他人畜產者……價不減者，笞二十」，對小吳應處笞二十。","data/112-ch.json#112-國文-23.png","data/112-ch.json#112-國文-g22.png"],"112-國文-24":["內相宅第堂軒巨麗、僕役穿綾羅、米袋上寫著「御用」，主人由童子扶持，排場使士人深信對方有錢，降低戒心。(A) 是士人自己想借錢；(B) 宅子是騙徒租來半日，袋中裝的是煤土；(D) 宅子原本就是騙徒臨時租用，事後已人去宅空。","data/112-ch.json#112-國文-24.png","data/112-ch.json#112-國文-g24.png"],"112-國文-25":["廬兒說「已晚，須明日」，是拖延交錢，讓騙徒有時間撤走；客叮囑「當早至，我俟於此」，讓士人相信隔天一定拿得到錢，不會起疑。","data/112-ch.json#112-國文-25.png","data/112-ch.json#112-國文-g24.png"],"112-國文-26":["士人「久客橐空」急需用錢（④ 需求心理），又因急迫只憑眼前排場就決定（② 隧道效應）；貸得五百仍「恨少」，被許以更多而送厚禮（③ 貪多心理）。文中沒有自認聰明、同情他人或恐懼官府的描述。","data/112-ch.json#112-國文-26.png","data/112-ch.json#112-國文-g24.png"],"112-國文-27":["「允爾五百」與「官命促爾耕」的「爾」都是第二人稱「你、你們」。(A)「故遊客」是舊識，「故列敘」是所以；(C)「及門」是到達，「及碗唇」是和；(D)「請益」是增加，「聖益聖」是更加。","data/112-ch.json#112-國文-27.png","data/112-ch.json#112-國文-g24.png"],"112-國文-28":["沈括說「常令人面與鑑大小相若」，是指照出的人面大小與鏡子相當，並非說鏡子尺寸與人臉相同。(A) 凹、凸之別；(B) 依鏡子大小增損凸起高低；(D) 小鏡微凸使能全納人面，都是他的觀察。","data/112-ch.json#112-國文-28.png","data/112-ch.json#112-國文-g28.png"],"112-國文-29":["① 圖中兩漢三國有直徑 20cm 的大鏡鏡面凸起明顯，不完全符合「鑑大則平，鑑小則凸」，錯誤。② 沈括只說「後人不能造」，沒有指明是哪個時代的工匠，無法判斷是否為殷商工匠。","data/112-ch.json#112-國文-29.png","data/112-ch.json#112-國文-g28.png"],"112-國文-30":["當代學者認為鑄造時銅液收縮，鏡體中央易有缺陷，加工時中心磨削較少以免缺陷外露，因而形成凸面。可見凸面鏡是為解決製鏡難題而產生，與沈括「為使用者考量」的說法不同。","data/112-ch.json#112-國文-30.png","data/112-ch.json#112-國文-g28.png"],"112-國文-31":["陶枕前傾的斜度、內彎的曲度、兩邊起翹的高度，形成合乎人體工學的曲面；作者試睡發現側臥不便，說明是為仰睡設計。(A) 底面是平的；(B) 只有上半段簡單畫花，整體素淨；(C) 支撐部分靠塑形而非雕花。","data/112-ch.json#112-國文-31.png","data/112-ch.json#112-國文-g31.png"],"112-國文-32":["作者認為陶枕不靠繁複裝飾，以簡單直率的造形配合人體，營造舒適感，這種簡約內斂、合用自然的設計最能代表宋代藝術精神。","data/112-ch.json#112-國文-32.png","data/112-ch.json#112-國文-g31.png"],"112-國文-33":["第二段說創作者「在造形上下了很大的功夫」，第三段寫「最重要的特色」——合乎功能的曲面，第四段寫「另一特色」——支撐部分的塑造。(A) 沒有市場價值不代表工匠經驗不足；(C) 人體工學只用來說明第一項特色；(D) 末段是讚美工匠直覺掌握造形的道理。","data/112-ch.json#112-國文-33.png","data/112-ch.json#112-國文-g31.png"],"112-國文-34":["本題選不適當的。「掌握了全球一半 LVMH 鞋子」是說 LVMH 鞋子有一半由這群臺灣業者生產，不是臺灣精品鞋銷量占全球市場一半。(A)(B)(D) 都正確。","data/112-ch.json#112-國文-34.png","data/112-ch.json#112-國文-g34.png"],"112-國文-35":["「當天……」兩段寫業者從各國趕回來參加活動，彼此競爭仍惺惺相惜，並說臺灣仍掌握最重要的供應鏈、研發中心留在臺灣，還成立基金會培育人才，表達鞋業巨頭珍惜並守護臺灣鞋業。","data/112-ch.json#112-國文-35.png","data/112-ch.json#112-國文-g34.png"],"112-國文-36":["龔松煙說「臺灣依然掌握全球最重要的製鞋供應鏈」，工廠移到各地也能迅速接起供應鏈，可歸納為上下游供應鏈穩固。(A) 他強調當年沒有資源；(B) 是希望年輕人加入；(D) 是說研發中心「仍會設在臺灣」，不是從國外遷回。","data/112-ch.json#112-國文-36.png","data/112-ch.json#112-國文-g34.png"],"112-國文-37":["長米「不強調自我」、隨加入的材料而成各式菜飯、炒飯，與「不凝滯於物，而能與世推移」的隨物變化最接近。(A) 順著自然紋理；(B) 做大事不拘小節；(D) 勤勞做事。","data/112-ch.json#112-國文-37.png","data/112-ch.json#112-國文-g37.png"],"112-國文-38":["「米的天性既純真又深情」說米跟什麼結合就成什麼飯，對應「米食種類變化多」（②）；「白飯之於佳肴，好比畫布之於色彩和線條」說白飯調和各道菜，對應「飯讓桌菜呈美味」（③）。","data/112-ch.json#112-國文-38.png","data/112-ch.json#112-國文-g37.png"],"112-英文-01":["句意：得知鎮上唯一的電影院下個月要關門，對居民來說是很大的「震驚」。a big shock 很大的衝擊。cable 電纜；tube 管子；zone 區域。","data/112-en.json#112-英文-01.png",null],"112-英文-02":["句意：動物權團體要「舉辦」派對為流浪貓募款。hold a party 舉辦派對。break 打破；fight 打鬥；spell 拼字。","data/112-en.json#112-英文-02.png",null],"112-英文-03":["句意：小說我「幾乎」寫完了，今晚要完成最後一章。almost 幾乎，呼應還差最後一章。already 已經（與今晚才完成矛盾）；always 總是；altogether 總共。","data/112-en.json#112-英文-03.png",null],"112-英文-04":["句意：在某些國家，盯著別人眼睛太久被認為「無禮」，所以應避免。rude 無禮的。basic 基本的；classical 古典的；legal 合法的。","data/112-en.json#112-英文-04.png",null],"112-英文-05":["句意：一直往氣球吹氣，它會砰一聲「爆開」。burst 爆裂。aim 瞄準；explore 探索；shine 發光。","data/112-en.json#112-英文-05.png",null],"112-英文-06":["句意：老闆同意提高員工「工資」，讓他們賺更多錢改善生活。wage 工資。permit 許可證；risk 風險；scale 規模、秤。","data/112-en.json#112-英文-06.png",null],"112-英文-07":["句意：我的牙齒對甜食很「敏感」，所以不吃糖果餅乾。be sensitive to 對……敏感。attractive 有吸引力的；effective 有效的；positive 正面的。","data/112-en.json#112-英文-07.png",null],"112-英文-08":["句意：Amy 向學校申請經費的提案沒有遇到任何「阻力」，所以拿到所需的全部經費。meet resistance 遇到反對。appreciation 欣賞；gratitude 感激；sympathy 同情。","data/112-en.json#112-英文-08.png",null],"112-英文-09":["畫線字 seriously 意為「嚴重地」，與 badly 同義。句意：William 的母親在車禍中嚴重受傷，必須住院一陣子。cheaply 便宜地；hardly 幾乎不；shortly 不久。","data/112-en.json#112-英文-09.png",null],"112-英文-10":["畫線字 spare 意為「多餘的、閒置的」，與 extra 同義。句意：抱歉我沒有多餘的錢借你，錢都拿去幫媽媽買新手機了。hot 熱的；quick 快的；soft 軟的。","data/112-en.json#112-英文-10.png",null],"112-英文-11":["Sergio 回答「偶爾才去一次」(Once in a long while)，可知 Anita 問的是「你現在還常去嗎？」。他已說過以前每週去，(C) 已有答案。","data/112-en.json#112-英文-11.png",null],"112-英文-12":["Betty 回答「好，我想看，可以告訴我地址嗎？」，可知經理問的是「您想來看看嗎？」。(C) 問時間，應回答時間。","data/112-en.json#112-英文-12.png",null],"112-英文-13":["Alex 問「充電前能開多遠？」，業務回答「續航距離 200 公里」(a range of 200 kilometers)。(D) charge 在此是「費用」，答非所問。","data/112-en.json#112-英文-13.png",null],"112-英文-14":["Roy 確認「你是說達文西的蒙娜麗莎嗎？」，Jane 回答「就是那幅，我在羅浮宮看到的」(That's the one)。","data/112-en.json#112-英文-14.png",null],"112-英文-15":["Annie 回答他有才華、強壯又可愛，說的是喜歡他的理由，所以 David 問「妳喜歡他哪一點？」。(A) Annie 並沒有見過他。","data/112-en.json#112-英文-15.png",null],"112-英文-16":["Jimmy 回答「我打字很快」，說明自己的技能，所以 King 女士問「你有什麼技能？」。","data/112-en.json#112-英文-16.png",null],"112-英文-17":["Jack 接著請秘書轉告黃博士他想預約，可知秘書說的是「恐怕他現在不在辦公室」。(A)(B)(C) 都表示找不到此人，就不會再請對方轉告。","data/112-en.json#112-英文-17.png",null],"112-英文-18":["Ting 女士回答「從七歲開始」，說的是學習期間，所以 Lin 女士問「她學芭蕾多久了？」(How long has she been learning ballet?)。","data/112-en.json#112-英文-18.png",null],"112-英文-19":["Angel 問「你怎麼認識他們的？」，Teddy 回答「我加入了一個網路社群」。(B)(C)(D) 都答非所問。","data/112-en.json#112-英文-19.png",null],"112-英文-20":["Danny 建議「何不去車庫看看？」，可知 Nancy 在衣櫥沒找到：「我這裡沒看到」。(A) 若找到就不必去車庫；(D) 丟掉了就不必再找。","data/112-en.json#112-英文-20.png",null],"112-英文-21":["前句說很容易看到鯨魚，後句說明原因：「因為」每年 4 到 10 月都有鯨魚游經東海岸。for 因為（對等連接詞）。nor 也不；so 所以；yet 然而。","data/112-en.json#112-英文-21.png","data/112-en.json#112-英文-g21.png"],"112-英文-22":["Today 搭配現在完成式，表示賞鯨「已成為」熱門活動，主詞單數用 has become。","data/112-en.json#112-英文-22.png","data/112-en.json#112-英文-g21.png"],"112-英文-23":["關係副詞 when 修飾表時間的 June to August：「海面平靜的 6 到 8 月」。","data/112-en.json#112-英文-23.png","data/112-en.json#112-英文-g21.png"],"112-英文-24":["Whale watching tours have been around since 1997：賞鯨活動自 1997 年起「就已存在」。be around 存在。","data/112-en.json#112-英文-24.png","data/112-en.json#112-英文-g21.png"],"112-英文-25":["為了近看鯨魚，船隻應從後方「接近」鯨魚，以免驚擾。approach 接近。accept 接受；admit 承認；affect 影響。","data/112-en.json#112-英文-25.png","data/112-en.json#112-英文-g21.png"],"112-英文-26":["two theories ... (which are) called the bystander effect and the Good Samaritan effect，用過去分詞 called 表被動，意為「稱為……」。","data/112-en.json#112-英文-26.png","data/112-en.json#112-英文-g26.png"],"112-英文-27":["旁觀者不「介入」幫忙，好撒馬利亞人則主動出手。step in 介入。cross out 刪除；hand in 繳交；throw out 丟棄。","data/112-en.json#112-英文-27.png","data/112-en.json#112-英文-g26.png"],"112-英文-28":["前句說旁觀者不幫忙的原因，後句說好撒馬利亞人幫忙的原因，兩者對比，用 On the other hand「另一方面」。","data/112-en.json#112-英文-28.png","data/112-en.json#112-英文-g26.png"],"112-英文-29":["pay attention to 注意。好撒馬利亞人會密切注意其他人是否在幫忙。","data/112-en.json#112-英文-29.png","data/112-en.json#112-英文-g26.png"],"112-英文-30":["看到別人在幫忙，他也比較可能跟著幫忙。as well 也，放句尾。neither 兩者都不；otherwise 否則；so far 到目前為止。","data/112-en.json#112-英文-30.png","data/112-en.json#112-英文-g26.png"],"112-英文-31":["依長條圖，David 每月花在飲料（Soft Drinks）的錢約 150 元，少於 200 元。","data/112-en.json#112-英文-31.png","data/112-en.json#112-英文-g31.png"],"112-英文-32":["Sam 的零食花費約 1000 元，Linda 約 500 元，Sam 比 Linda 多。(A) Mary 花最多的是娛樂；(C) 飲料 Mary 約 250 元、Linda 約 300 元；(D) 娛樂 David 約 300 元，比 Sam 的約 150 元多。","data/112-en.json#112-英文-32.png","data/112-en.json#112-英文-g31.png"],"112-英文-33":["想知道怎麼服藥，要看用法說明 Directions（成人與 12 歲以上兒童每 4～6 小時 2 錠）。Uses 是用途；Warnings 是警語；Other information 是保存方式。","data/112-en.json#112-英文-33.png","data/112-en.json#112-英文-g33.png"],"112-英文-34":["Warnings 寫明使用時「可能嗜睡」(you may get drowsy)，並應避免喝酒、小心開車，即可能感到想睡、無法清楚思考。(C)(D) 是這藥要緩解的症狀。","data/112-en.json#112-英文-34.png","data/112-en.json#112-英文-g33.png"],"112-英文-35":["12 歲以上每 4～6 小時 2 錠，24 小時內不超過 12 錠，13 歲兒童一天吃 10 錠符合規定。(B) 應避免酒精飲料；(C) 青光眼患者用藥前要先問醫師，此藥並非治療青光眼；(D) 孕婦應先問醫師。","data/112-en.json#112-英文-35.png","data/112-en.json#112-英文-g33.png"],"112-英文-36":["本題選「沒有」提到的詐騙手法。公告提到：用你的帳戶代轉款項並付手續費、錄取前要你先匯錢或提供帳戶資料、要你先買產品再銷售。沒有提到要求交出手機。","data/112-en.json#112-英文-36.png","data/112-en.json#112-英文-g36.png"],"112-英文-37":["公告建議求職者對公司與招募者做背景調查，即應進一步了解雇主。(A) 詐騙者是假冒雇主的罪犯；(B) 公告沒有列出詐騙網站；(D) 學校職員是協助學生判斷可疑工作。","data/112-en.json#112-英文-37.png","data/112-en.json#112-英文-g36.png"],"112-英文-38":["文章說明感測器等科技工具如何即時追蹤表現、精進動作、預防運動傷害，主旨是以科技工具訓練運動員。(A)(C) 對象應是運動員而非教練。","data/112-en.json#112-英文-38.png","data/112-en.json#112-英文-g38.png"],"112-英文-39":["live tracking 指「即時追蹤」，第二段說教練能即時（in real time）測量與追蹤表現，即在活動進行時觀察。(A) 是過去事後評估的做法。","data/112-en.json#112-英文-39.png","data/112-en.json#112-英文-g38.png"],"112-英文-40":["文中說教練能在訓練中讀取即時數據，立刻知道運動員表現並決定休息或加強。過去則要等練習後看錄影才評估，(C) 是過去的做法。","data/112-en.json#112-英文-40.png","data/112-en.json#112-英文-g38.png"],"112-英文-41":["作者說科技對運動訓練最重要的影響是「傷害大幅減少」(The most important effect ... injuries have been sharply reduced)。","data/112-en.json#112-英文-41.png","data/112-en.json#112-英文-g38.png"],"112-英文-42":["文中說科技工具能測量運動員精確的位置、距離、速度，以及跳水角度、腿部動作等細節。(A) 是感測器偵測運動員；(B) 不只心跳；(C) 是游泳選手跳水，不是教練。","data/112-en.json#112-英文-42.png","data/112-en.json#112-英文-g38.png"],"113-國文-01":["(C)「摒息」應作「屏息」，指暫時抑止呼吸；「倏乎」應作「倏忽」，形容極快。(A) 改弦易轍；(B) 抓耳撓腮、臃腫；(D) 蓊鬱、橫亙，都正確。","data/113-ch.json#113-國文-01.png",null],"113-國文-02":["「莫能如也」的「如」是「及、比得上」。(D)「猶不如人」也是比不上別人，意義相同。(A)「所如」是「往」；(B)「如線」是「像」；(C)「悉如外人」是「如同」。","data/113-ch.json#113-國文-02.png",null],"113-國文-03":["「鵝蛋臉」是像鵝蛋一般的臉，名詞作譬喻修飾。(D)「虎狼之心」是像虎狼一般凶殘的心，用法相同。(A)「錦鱗」借代魚；(B)「烏鵲」是鳥名；(C)「江魚」是江中的魚，不是比喻。","data/113-ch.json#113-國文-03.png",null],"113-國文-04":["削弱外放的表演，以樸實不誇張的方式詮釋，填「返璞歸真」；情緒由平靜到憤怒再到悲哀，變化清楚，填「層次分明」；無聲卻更能傳遞情緒，填「無聲勝有聲」。「不拘細行」指不在意小節；「千頭萬緒」形容雜亂；「脈脈不得語」指含情而說不出話。","data/113-ch.json#113-國文-04.png",null],"113-國文-05":["母親在房裡對鏡出神，「走廊的那一邊」卻傳來父親和姨娘的笑語，以空間的阻隔暗示父母感情疏離，母親內心愁苦。(A) 女兒望著母親是寫母親的神情；(B) 對比鄉下時的豐潤，寫母親的憔悴；(C) 失神是寫母親的憂愁，不是不近人情。","data/113-ch.json#113-國文-05.png",null],"113-國文-06":["上聯「萬石家風惟孝弟」、下聯「百年世業在詩書」，孝悌與讀書都是儒家重視的家風。對聯上聯末字應為仄聲（弟），下聯末字應為平聲（書），故 ○○ 填「孝弟」、□□ 填「詩書」。「無為」「齊物」是道家思想。","data/113-ch.json#113-國文-06.png",null],"113-國文-07":["講價的步驟：③ 看準店裡沒有什麼就要什麼 → ④ 讓夥計顯得寒傖、先有幾分慚愧 → ⑤ 然後才說出真正要買的東西 → ① 夥計於氣餒之餘 → ② 自然歡天喜地捧出貨色，接「價錢根本不會太高」。","data/113-ch.json#113-國文-07.png",null],"113-國文-08":["「惑而不從師」：有疑惑「卻」不向老師請教，「而」表轉折。(A)「提刀而立」的「而」連接前後動作；(B)「感極而悲」表因果；(C)「見壞宅而哭之」表順承。","data/113-ch.json#113-國文-08.png",null],"113-國文-09":["① 秦穆公聽完燭之武分析後「與鄭人盟」並派兵戍守，是合作，不是對立，錯誤；② 屈原不接受漁父「與世推移」的勸告，堅持「寧赴湘流」，屬高度堅持自我，不是順應，錯誤。","data/113-ch.json#113-國文-09.png",null],"113-國文-10":["依魚骨圖分析「為何南資舟而北資車」：主因一是「載人」，貴人必須出門又怕走路勞累（行畏周行）；主因二是「運貨」，賤物是必需品，要靠運送互通有無（坐窮負販）。文中沒有「重視人權」「貶抑物價」之意。","data/113-ch.json#113-國文-10.png",null],"113-國文-11":["山上憶良說他回日本後不久，唐朝賞梅之風傳到國內，貴族競相模仿，可知成為上層社會的時尚。(A) 文中未說梅花宴為遣唐使而辦；(B) 只有山上憶良去過唐朝；(D) 大伴旅人是受藤原家族排擠而離京，長屋王事件發生在他到職之後。","data/113-ch.json#113-國文-11.png","data/113-ch.json#113-國文-g11.png"],"113-國文-12":["山上憶良說大伴旅人用了〈蘭亭集序〉的「快然自足」，希望大家在梅花宴中一同體驗「欣於所遇」的境界，即隨遇而樂的自適。大伴旅人自己也說序中沒有王羲之對死生的省思。","data/113-ch.json#113-國文-12.png","data/113-ch.json#113-國文-g11.png"],"113-國文-13":["本題選不適當的。③「忘言一室之裡，開衿烟霞之外」寫賓主默契、胸懷開放於山水之間；〈蘭亭集序〉的「悟言一室之內」「放浪形骸之外」是說人生取捨的兩種方式，並非強調美景令人忘我。(A)(B)(D) 的對照都正確。","data/113-ch.json#113-國文-13.png","data/113-ch.json#113-國文-g11.png"],"113-國文-14":["大伴旅人期待的是「單純投入欣賞、充滿美感聯想」的梅花詩，以雪喻梅最好。① 以雪與花互喻，③ 寫梅影與梅香，都屬美感聯想；② 提到匈奴、④ 寫閨中愁怨，屬戍邊、思鄉之情，是他不希望的寫法。","data/113-ch.json#113-國文-14.png","data/113-ch.json#113-國文-g11.png"],"113-國文-15":["① 甲「梅花飄零，直似雪傾」以雪喻梅，符合大伴旅人的歌；丙「怎能獨自觀賞，送此春日晝」呼籲大家同樂，符合山上憶良自述的歌，正確。② 丁「整日盡興遊」單純享受賞梅之樂，乙「憶起京城時候」流露思鄉之情，丁較符合大伴旅人的期待，正確。","data/113-ch.json#113-國文-15.png","data/113-ch.json#113-國文-g11.png"],"113-國文-16":["雕塑中，抱起婦女的乙是羅馬士兵，底部蹲地反抗的甲是薩賓男人。畫作中，握劍的丙是兒女的舅舅（薩賓人），高舉長矛的丁是兒女的父親（羅馬人）。故羅馬人為乙、丁。","data/113-ch.json#113-國文-16.png","data/113-ch.json#113-國文-g16.png"],"113-國文-17":["① 完成時代：雕塑完成於 1583 年，畫家大衛生於十八世紀末，「強擄薩賓婦女」較早；② 事件時間：先有羅馬人擄走婦女，數年後薩賓人宣戰、婦女衝入戰場勸和，也是「強擄薩賓婦女」較早。","data/113-ch.json#113-國文-17.png","data/113-ch.json#113-國文-g16.png"],"113-國文-18":["古羅馬史家認為羅穆盧斯的劫掠是為了讓羅馬生生不息、並藉婚姻建立政治聯盟，側重他的謀略。(B) 大衛畫的就是傳說中和解的關鍵時刻，沒有翻轉結局；(C) 詹博洛尼亞的雕塑呈現劫掠的暴力；(D) 強調薩賓婦女勇敢的是大衛的畫。","data/113-ch.json#113-國文-18.png","data/113-ch.json#113-國文-g16.png"],"113-國文-19":["薩賓人蔑視剛起步的羅馬人，羅馬人藉此證明自己雖年輕卻勇敢無畏，「初生之犢不畏虎」最合適。其他俗語分別指忠誠、外來者難敵地方勢力、不走回頭路，都不合文意。","data/113-ch.json#113-國文-19.png","data/113-ch.json#113-國文-g16.png"],"113-國文-20":["第二段說明洗衣機大幅減少家務時間，使婦女外出工作、地位提升，用來證明洗衣機是對世界產生革命性影響的重要發明，以呼應末段的論點。","data/113-ch.json#113-國文-20.png","data/113-ch.json#113-國文-g20.png"],"113-國文-21":["作者認為洗衣機、電報的影響比網路更大，現代人卻因網路發生在眼前而過度宣稱其效益，「把望遠鏡拿反」即把近的看大、遠的看小，高估新興科技的影響。","data/113-ch.json#113-國文-21.png","data/113-ch.json#113-國文-g20.png"],"113-國文-22":["框中以「減少的時間比例」比較交通工具，「突破性」只看時間節省比例，定義範圍不明（①）；而突破性還涉及距離、載重、普及度等，只用時間差距推論，因果關係片面（④）。② 論據是實測數據；③ 論據與論點並不對立。","data/113-ch.json#113-國文-22.png","data/113-ch.json#113-國文-g20.png"],"113-國文-23":["訟師幫阿吉提出「威逼人致死」的指控，地主多因內疚與官司難纏而接受，結果地主被判威逼人致死罪，阿吉獲賠喪葬費。這就是他說的「討公道」。","data/113-ch.json#113-國文-23.png","data/113-ch.json#113-國文-g23.png"],"113-國文-24":["碑文告誡想以自殺誣賴他人者：命案一月內審結，誣告會被查出，「死者枉送性命，不值一錢」，家屬也會觸法，犧牲毫無價值。(A)(C)(D) 不是碑文的告誡重點。","data/113-ch.json#113-國文-24.png","data/113-ch.json#113-國文-g23.png"],"113-國文-25":["訟師指出：經濟困難的地方，窮人可能拿命換生計；縣官又為了避免被翻案影響仕途，樂於以「威逼人致死」結案。只要民生壓力與官場現實存在，以自殺謀財就難以禁絕，限期審結也解不開這個死結。","data/113-ch.json#113-國文-25.png","data/113-ch.json#113-國文-g23.png"],"113-國文-26":["碑文是巡撫告誡百姓的官方告示，以上對下的口吻訓勉、警告。(C)「准該商民投局稟揭，以憑究辦。切切。特示」也是官府對百姓的告示。(A) 是對話；(B) 是臣子上奏的公文；(D) 是朋友間的對話。","data/113-ch.json#113-國文-26.png","data/113-ch.json#113-國文-g23.png"],"113-國文-27":["文中提到的發展因素有：組車廠與零件廠形成聚落（A）、往高階車款發展轉型（B）、巨大與美利達放下競爭攜手合作（C）。文中說汽機車與自行車不同，並沒有異業結盟。","data/113-ch.json#113-國文-27.png","data/113-ch.json#113-國文-g27.png"],"113-國文-28":["作者以「零件廠像水，可養活各種魚」為喻，說明零件廠能供應國內外許多組車廠，銷售對象廣，因此零件產值超過成車。(A) 沒有分區列產值；(B) 數量下降是說明產業外移；(C) 列舉的是零件廠，不是品牌。","data/113-ch.json#113-國文-28.png","data/113-ch.json#113-國文-g27.png"],"113-國文-29":["表中各年度自行車零件產值都遠高於自行車（成車）產值，可印證文中「零件產值超過成車」。表中沒有個別公司、輪胎廠名單或地區分布的資料，(B)(C)(D) 都無法推知。","data/113-ch.json#113-國文-29.png","data/113-ch.json#113-國文-g27.png"],"113-國文-30":["契文說「行契李四是某甲，賣與鄰居某人看」，可知賣方是李四，買方是李四的鄰居。三藏、石崇是契文中的典故人物。","data/113-ch.json#113-國文-30.png","data/113-ch.json#113-國文-g30.png"],"113-國文-31":["契文「買主願如石崇富，壽如彭祖高」，是祝福買貓的人像石崇一樣富有、像彭祖一樣長壽。(B) 三藏帶貓是為了護持經卷；(C) 沒有提到神明證其敏捷；(D)「莫走東畔與西邊」是對貓的叮嚀。","data/113-ch.json#113-國文-31.png","data/113-ch.json#113-國文-g30.png"],"113-國文-32":["納貓法說把貓帶回後，拜過堂、灶與狗，在土堆插筷子，「然後復床睡，勿令走往」，是讓貓在床邊睡，不是帶到廚房。(A) 討筷子一根；(B) 從吉方歸；(D) 插筷子於土堆使貓不在家中撒糞，都是建議作為。","data/113-ch.json#113-國文-32.png","data/113-ch.json#113-國文-g30.png"],"113-國文-33":["① H 先生罵貓咬死了他養的白雄雞，雞屬六畜，所以「不害六畜」的辯駁不成立，否；② Z 先生責怪貓跟他爭坐暖舊毯子，貓的確在家沒有亂跑，「沒走外去」的辯駁尚稱合理，是。","data/113-ch.json#113-國文-33.png","data/113-ch.json#113-國文-g30.png"],"113-國文-34":["乙文先寫魚「游水的姿態竟然還十分從容」，再寫牠用眼睛「狠狠瞪我」「射出倨傲的神采」，設想魚傲然無畏。(A)(B) 乙丙二文的擬人化是在獵捕中揣摩對手，與甲文 ① 情感互動、② 界定人類無關；(D) 丙文只推測魚的年齡，並未寫牠老奸巨猾。","data/113-ch.json#113-國文-34.png","data/113-ch.json#113-國文-g34.png"],"113-國文-35":["丙文的「我」認為「收獲比自己大的魚是不吉利的」，於是放棄魚槍，隱含對人類能力有限、不應強取的覺察。(A) 乙文的悵惘是失去大魚；(B) 丙文認輸是因力量不敵大魚；(C) 乙文的意識是「你已經失去了這條魚」，並非征服的意志。","data/113-ch.json#113-國文-35.png","data/113-ch.json#113-國文-g34.png"],"113-國文-36":["蘇軾〈赤壁賦〉「茍非吾之所有，雖一毫而莫取」，主張不屬於自己的就不妄取，最接近不自居萬物主宰、不妄施掠奪的精神。(A) 失去同盟不明智；(B) 不因外物得失而悲喜；(D) 讚歎人的巧思。","data/113-ch.json#113-國文-36.png","data/113-ch.json#113-國文-g34.png"],"113-國文-37":["IKEA 效應是對自己親手付出的成果特別滿意、珍惜。「孩子總是自己的好」意指對自己的心血結晶偏愛，最接近。(A) 父強子亦強；(C) 自身優秀自然吸引他人；(D) 本質不因名稱改變。","data/113-ch.json#113-國文-37.png","data/113-ch.json#113-國文-g37.png"],"113-國文-38":["負面影響是「自我感覺良好」，誤以為別人也會肯定，以及對投注大量資源卻無進展的計畫敝帚自珍。左圖中自己喜愛多、別人喜愛少的 ②，右圖中投注心力多、獲得成效少的 ❷，最應注意。","data/113-ch.json#113-國文-38.png","data/113-ch.json#113-國文-g37.png"],"113-英文-01":["句意：Johnny 戴了一頂很「特別」的帽子，和別人的看起來不一樣。special 特別的，呼應 looks different。common 常見的；general 一般的；regular 普通的。","data/113-en.json#113-英文-01.png",null],"113-英文-02":["句意：噪音讓我難以「專心」，所以我總是找安靜的地方全神貫注地讀書。focus 專注，呼應 with full attention。bend 彎曲；panic 驚慌；wander 漫遊。","data/113-en.json#113-英文-02.png",null],"113-英文-03":["句意：這裡有一個煮雞湯的實用「小訣竅」：加一點鹽。tip 訣竅、建議。lip 嘴唇；gap 缺口；nap 小睡。","data/113-en.json#113-英文-03.png",null],"113-英文-04":["句意：爺爺每天「大約」同一時間睡覺，他大概晚上九點上床。roughly 大約，呼應 at about 9 pm。briefly 簡短地；fluently 流利地；gently 溫柔地。","data/113-en.json#113-英文-04.png",null],"113-英文-05":["句意：和室友友善相處，能幫你避免和他們發生「衝突」。stay away from conflicts 避免衝突。dialogue 對話；personality 個性；relationship 關係。","data/113-en.json#113-英文-05.png",null],"113-英文-06":["句意：Jack 很「固執」，不管你多努力說服，他都不會改變決定。stubborn 固執的。easy-going 隨和的；democratic 民主的；obedient 順從的。","data/113-en.json#113-英文-06.png",null],"113-英文-07":["句意：郭婞淳贏得東京奧運金牌，我很「欽佩」她，希望有一天能像她一樣。admire 欽佩。frighten 使害怕；impress 使印象深刻（主詞應是郭婞淳）；suspect 懷疑。","data/113-en.json#113-英文-07.png",null],"113-英文-08":["畫線字 skillfully 意為「熟練地」，與 smoothly（流暢地）意思最接近。句意：Amy 雖然上週手受傷，仍能像以前一樣熟練地拉小提琴。casually 隨意地；cruelly 殘忍地；strictly 嚴格地。","data/113-en.json#113-英文-08.png",null],"113-英文-09":["畫線字 conquer 意為「克服、征服」，與 beat（打敗）同義。句意：May 想搭飛機旅行，就必須克服對飛行的恐懼。hunt 打獵；recover 恢復；select 挑選。","data/113-en.json#113-英文-09.png",null],"113-英文-10":["畫線片語 against the law 意為「違法的」，與 illegal 同義。句意：駕駛不在斑馬線停車讓行人先過是違法的，會被罰款。national 國家的；political 政治的；unusual 不尋常的。","data/113-en.json#113-英文-10.png",null],"113-英文-11":["顧客請攤販給一支叉子，攤販回答「當然，給你」，顧客才道謝。(A) You're welcome 是回應道謝；(C)(D) 與要叉子無關。","data/113-en.json#113-英文-11.png",null],"113-英文-12":["Tina 回答「他想告訴我他和女友分手的事」，說明的是來訪原因，所以 Mike 問「他為什麼要來？」。","data/113-en.json#113-英文-12.png",null],"113-英文-13":["Chen 太太回答「不，還沒有」，可知 Chen 先生說的是「我以為妳已經見過他們了」。接著 Chen 先生描述鄰居外貌，也表示他見過。","data/113-en.json#113-英文-13.png",null],"113-英文-14":["Jacky 回答「只有大約 12 秒」，是時間長度，所以 Adam 問的是「那次飛行多久？」(How long was the flight?)。(D) 問距離，答案應是距離單位。","data/113-en.json#113-英文-14.png",null],"113-英文-15":["Amy 問「像是什麼？」，Janet 舉例說過去女性不准上台演戲，可知 Janet 先前說的是「我還蒐集了很多關於劇場的資料」。","data/113-en.json#113-英文-15.png",null],"113-英文-16":["Rita 問 Ben 在其他工作中如何展現領導力，Ben 回答「在目前的職位上，我管理一個十人團隊」，Rita 才說很好。(A) 是為主管工作，不是領導；(B)(C) 答非所問。","data/113-en.json#113-英文-16.png",null],"113-英文-17":["Eric 回答「他們很棒，有很多創意」，描述的是人，所以 Sue 問「新同事怎麼樣？」(what are the new colleagues like?)。","data/113-en.json#113-英文-17.png",null],"113-英文-18":["Susan 說「好，請你先開始，剩下的投影片我自己處理」，可知 Jason 問的是「要我先介紹前幾頁嗎？」。","data/113-en.json#113-英文-18.png",null],"113-英文-19":["男子接著說「這又不影響我！」，學生才解釋雨林的重要性，可知男子質疑的是「我為什麼要拯救雨林？」。","data/113-en.json#113-英文-19.png",null],"113-英文-20":["Lucy 覺得簡訊很可疑，勸 Jack「嘿，別點」，並打電話向飯店確認，以防詐騙。(B)(C)(D) 都是鼓勵點連結，與 Lucy 的態度相反。","data/113-en.json#113-英文-20.png",null],"113-英文-21":["飛魚「被視為」上天的禮物，用被動語態 are regarded as。主詞 Flying fish 為複數，故用 are。","data/113-en.json#113-英文-21.png","data/113-en.json#113-英文-g21.png"],"113-英文-22":["Over the years「這些年來」，表示一段持續的時間，每年飛魚季都有成千上萬遊客造訪。","data/113-en.json#113-英文-22.png","data/113-en.json#113-英文-g21.png"],"113-英文-23":["前句說很多遊客不尊重當地習俗，所以居民不斷提醒遊客避免「無禮的行為」，後文接著舉出不可做的事。(A)(D) 是好行為，不必避免。","data/113-en.json#113-英文-23.png","data/113-en.json#113-英文-g21.png"],"113-英文-24":["前一句說 One thing tourists should not do is...，接著說「另一件」遊客不該做的事，用 Another thing。Other 後接複數名詞；Any other、No other 不合語意。","data/113-en.json#113-英文-24.png","data/113-en.json#113-英文-g21.png"],"113-英文-25":["「起初」3D 列印機只能做小而簡單的塑膠物品，後句以 But now 對比現在。At first 起初。Finally 最後；Soon 很快；In summary 總之。","data/113-en.json#113-英文-25.png","data/113-en.json#113-英文-g25.png"],"113-英文-26":["後面有 than，需用比較級，waste 是不可數名詞，用 less waste「較少的廢料」，與前面 fewer resources 對應。","data/113-en.json#113-英文-26.png","data/113-en.json#113-英文-g25.png"],"113-英文-27":["主詞是 One of the most exciting applications（其中「一個」應用），為單數，動詞用 is。","data/113-en.json#113-英文-27.png","data/113-en.json#113-英文-g25.png"],"113-英文-28":["AI 能找出減輕結構重量「同時」增加強度的最佳方法。while 同時，後接 V-ing。nor 也不；since 因為；unless 除非。","data/113-en.json#113-英文-28.png","data/113-en.json#113-英文-g25.png"],"113-英文-29":["本題選「不正確」的。606 次列車週六抵達桃園的時間是 08:38，不是 08:30。(A) 802 次每日行駛；(B) 1510 次台中到台北 69 分鐘，比 1202 次的 46 分鐘久；(D) 204 次停靠板橋與台北。","data/113-en.json#113-英文-29.png","data/113-en.json#113-英文-g29.png"],"113-英文-30":["週六可搭的車次有每日行駛的 802、204 與週六的 606。需停新竹讓 Denny 上車，且 08:50 前到台北：802 次新竹 07:58、台北 08:32，符合；204 次不停新竹；606 次 09:02 才到台北。1202、1602 只在週一至週五行駛。","data/113-en.json#113-英文-30.png","data/113-en.json#113-英文-g29.png"],"113-英文-31":["團隊運動是兩隊比賽的項目：籃球（Two teams）與橄欖球（Two teams）。自行車、游泳、舉重是個人運動（An individual），羽球是兩人或四人對打。","data/113-en.json#113-英文-31.png","data/113-en.json#113-英文-g31.png"],"113-英文-32":["Fuhao 週一、週二晚上要工作，不能參加週一晚的游泳，以及週二晚的籃球與舉重。可參加的是羽球（週五晚）、自行車（週四早上）、橄欖球（週六晚）。","data/113-en.json#113-英文-32.png","data/113-en.json#113-英文-g31.png"],"113-英文-33":["依網頁比較表，兩間飯店的服務都有 Free Wi-Fi。戶外泳池與商務中心只有 Universe Hotel 有，洗衣服務只有 Cruise Hotel 有。","data/113-en.json#113-英文-33.png","data/113-en.json#113-英文-g33.png"],"113-英文-34":["Cruise Hotel 距主題樂園 6 公里，Universe Hotel 距 16 公里。住離樂園較近的 Cruise Hotel，要開 6 公里。","data/113-en.json#113-英文-34.png","data/113-en.json#113-英文-g33.png"],"113-英文-35":["Universe Hotel 有 Outdoor pool，想游泳應選它。(A) 健身中心在 Cruise Hotel；(C) Cruise Hotel 單人房是 2,700 元，1,800 元是 Universe Hotel；(D) 24 小時客房服務在 Universe Hotel。","data/113-en.json#113-英文-35.png","data/113-en.json#113-英文-g33.png"],"113-英文-36":["文章以黃仁勳分享的兩堂課為主：不因失敗氣餒、遇到困難仍堅持下去，並談他不斷自我要求，主旨是如何面對困境。(B)(C) 只是背景。","data/113-en.json#113-英文-36.png","data/113-en.json#113-英文-g36.png"],"113-英文-37":["本題選「不是」自我精進例子的。1993 年滿 30 歲只是年齡，並非努力的成果。到晶片公司工作、取得兩個工程學位、與朋友創辦 NVIDIA 都是他推動自己進步的例子。","data/113-en.json#113-英文-37.png","data/113-en.json#113-英文-g36.png"],"113-英文-38":["依時間：1996 年公司幾乎倒閉（b）→ 承認錯誤、向大客戶求助並研發晶片（d）→ 2007 年投資的新產品多年後用於機器學習才獲利（a）→ 2023 年名列 AI 百大影響力人物（c）。","data/113-en.json#113-英文-38.png","data/113-en.json#113-英文-g36.png"],"113-英文-39":["文章介紹臺灣第一顆自製氣象衛星「獵風者」：命名由來、運作原理、研發合作與貢獻，主旨是介紹這顆衛星。(B) 海神只是命名由來。","data/113-en.json#113-英文-39.png","data/113-en.json#113-英文-g39.png"],"113-英文-40":["reflected signals 指從地球表面「反射回來」的訊號，下一句也說接收 signals which are sent back from sea surfaces，故與 sent back 意義最接近。","data/113-en.json#113-英文-40.png","data/113-en.json#113-英文-g39.png"],"113-英文-41":["文末說獵風者的成功「是臺灣太空工程向前邁進的重要一步」，顯示臺灣太空技術的進步。(A) 計畫 2014 年才開始，2023 年才升空；(B) 國產化比例是 82%；(D) 超過 20 個本地團隊參與。","data/113-en.json#113-英文-41.png","data/113-en.json#113-英文-g39.png"],"113-英文-42":["文中說獵風者能提供更準確的資訊、支援防災，改善颱風強度與路徑的預測，可推知能減少惡劣天氣造成的損害。(B) 它是預測颱風，不是增強颱風；(C)(D) 都不是它的功能。","data/113-en.json#113-英文-42.png","data/113-en.json#113-英文-g39.png"],"114-國文-01":["(A)「功德無諒」應作「功德無量」，指功德多到無法計量。(B) 豐饒、饑饉；(C) 紛雜、千頭萬緒；(D) 倨傲、招搖過市，都正確。","data/114-ch.json#114-國文-01.png",null],"114-國文-02":["② 導致：主語並非有意識地造成結果。(C) 船身航行把海水犁成白浪，並非船身有意為之，屬導致。(A)(B)(D) 的主語（妳、余燕翼、母親）都是有意識地處置某事物。","data/114-ch.json#114-國文-02.png",null],"114-國文-03":["「類出國」的「類」是「像、類似」。(D)「有類橐駝者」意為「好像駱駝」，意思相近。(A)「菜蔬稻稗之類」是種類；(B)「品類之盛」是萬物；(C)「群類」指同類、族群。","data/114-ch.json#114-國文-03.png",null],"114-國文-04":["詐騙集團謊稱案情釐清後會把錢還給民眾，從騙徒的立場應說「歸還匯款」；「收回」是民眾的角度，主客顛倒。(A) 改成被動句意思不通；(B) 斷句後語意變成傳喚民眾卻沒到案，反而錯誤；(C)「存款主動前往法院」主語不合理。","data/114-ch.json#114-國文-04.png",null],"114-國文-05":["「不僅在於……（①）更在於……（⑤）」先說成功的兩個層面；接著說明融入全球語境的方法：「既透過熟悉的遊戲……（④），也運用英熙娃娃的純真形象（③），與無情的生存遊戲形成對比（②）」，接末句「帶來強烈的視覺與情感衝擊」。","data/114-ch.json#114-國文-05.png",null],"114-國文-06":["(C)「餘音嫋嫋」這個原因同時導致「舞幽壑之潛蛟」與「泣孤舟之嫠婦」兩個結果，符合「Ⅰ導致了Ⅱ與Ⅲ」。(A) 是兩項條件並列；(B) 是票價的並列說明，沒有因果；(D) 說明對句讀與疑惑兩種情況的不同態度，不是兩個原因共同導致一個結果。","data/114-ch.json#114-國文-06.png",null],"114-國文-07":["表中 ① 風、君、江、古、北、劍，③ 人間、西風、風流、白髮、風雨、歸來，多寫江山、歷史、壯志與人生感慨，屬豪放詞；② 春、憐、花、鴛、愁、芳，④ 東風、相逢、何處、天涯、春風、相思，多寫春景與相思離情，屬婉約詞。","data/114-ch.json#114-國文-07.png",null],"114-國文-08":["炒米粉在大街小巷的攤販夜市都吃得到，填「街頭巷尾」；家庭主婦各有拿手做法、彼此較勁，填「互別苗頭」。「前呼後擁」形容隨從眾多；「一知半解」與家常拿手菜的語意不合。","data/114-ch.json#114-國文-08.png",null],"114-國文-09":["耳鑒只聽畫家名氣就搶購，揣骨聽聲以手摸畫色判斷好壞，兩者共同點是鑑定方法粗糙（①）；耳鑒憑畫者名聲（②），揣骨聽聲憑觸感（③）。","data/114-ch.json#114-國文-09.png",null],"114-國文-10":["鄭文公說「是寡人之過也」，是道歉（①）；又說「鄭亡，子亦有不利焉」，提醒燭之武事情與他切身相關（⑥）。劉邦把拒關的錯推給「鯫生說我」，是卸責給他人（②）。","data/114-ch.json#114-國文-10.png",null],"114-國文-11":["查大人原本沒有為難兒童的意思，但因有人插嘴，怕被誤會是受到抗議才放人，有損做官的尊嚴，所以要把兒童帶回衙門審問，以立官威。(A) 參並未計較斤兩，是巡警因參照實報斤兩而不悅；(B) 稱仔是參自己的，巡警藉口稱仔不堪用；(C) 查大人打兒童是因厭惡哭聲。","data/114-ch.json#114-國文-11.png","data/114-ch.json#114-國文-g11.png"],"114-國文-12":["④ 民眾出於同情替兒童說話，反而讓查大人為了面子必須審問兒童，兒童因此更不幸。(A) ① 是依當時慣例，表示警察要的東西不必付錢；(B) ② 巡警要求秤重，表面上客氣，並非設圈套；(C) ③ 查大人認為啼哭是卑劣、有辱尊嚴的舉動。","data/114-ch.json#114-國文-12.png","data/114-ch.json#114-國文-g11.png"],"114-國文-13":["甲文主要寫巡警的言行與態度由客氣到「變色」、「赫怒」；乙文除言行外，還寫出查大人「怕被世間誤解」「關礙做官的尊嚴」等內心想法。(A) 二文以敘述者角度，不是路人視角；(C)「誠實的參」「不幸這個兒童」都是敘述者的評價；(D) 施暴者並無受群眾威脅的不安。","data/114-ch.json#114-國文-13.png","data/114-ch.json#114-國文-g11.png"],"114-國文-14":["Ⅰ 說「輕輕地打」，卻留下「指痕紅腫」，話中訊息互相矛盾（②）。Ⅱ「做官的不會錯，現在已經成為定理」，是故意說違背常理的反話（①），表面稱頌官員，實則譏諷（③）。","data/114-ch.json#114-國文-14.png","data/114-ch.json#114-國文-g11.png"],"114-國文-15":["巡警與查大人都怕失去威嚴，認為威勢不夠人民就會冒犯，符合「威寡者，則下侵上」。賴和批評他們濫權、處罰不當，使百姓無所適從，符合「刑罰不中，則民無所措手足」。","data/114-ch.json#114-國文-15.png","data/114-ch.json#114-國文-g11.png"],"114-國文-16":["依文與圖：長信宮燈「中空的右臂是導煙管」（ㄅ）；夾燈盞「下層則從側邊小孔注水」（ㄈ）；銅牛燈的燈盤用來盛放燃料（ㄉ）。","data/114-ch.json#114-國文-16.png","data/114-ch.json#114-國文-g16.png"],"114-國文-17":["兩座銅燈的燈盤都有針錐，是為了插住固態的動物油脂，考量燃料屬性；夾燈盞的省油效果要夏天才達到約 10%，受氣溫影響。(A) 漢代民間多用陶燈，宋代夾燈盞是瓷製；(B) 夾燈盞一體成型，不能拆；(C) 長信宮燈的燈罩可調節亮度與方向。","data/114-ch.json#114-國文-17.png","data/114-ch.json#114-國文-g16.png"],"114-國文-18":["三燈都配合燃料設計（銅燈針錐插固態油脂、夾燈盞注水降溫省油），也都配合當時的起居方式（漢人席地而坐、宋人坐椅子）設計高度。(B)(C)(D) 不是三者共同的考量。","data/114-ch.json#114-國文-18.png","data/114-ch.json#114-國文-g16.png"],"114-國文-19":["① 油燈在商周就有，桃花源居民避的是秦亂，自然知道油燈；不知漢魏晉，也不能推得他們不知外界用青銅燈，錯誤。② 文中說「不是夾層水多就省油效果強，所以燈盞也不用大」，夾燈盞並未越做越大，錯誤。","data/114-ch.json#114-國文-19.png","data/114-ch.json#114-國文-g16.png"],"114-國文-20":["焦奇空手打虎出名後，富家仰慕其勇、設宴款待，可見打虎使他成名，開始有社交。(A) 生擒小虎並非出於好生之德；(B)「辟易」是眾人驚退，不是排擠；(D)「口講指畫，意氣自豪」是誇耀自得，不是思慮縝密。","data/114-ch.json#114-國文-20.png","data/114-ch.json#114-國文-g20.png"],"114-國文-21":["文中寫貓「一躍登屋角，目耽耽視焦」「嗥然一聲，曳尾徐步」，以動作與眼神寫出貓在混亂中敏捷又從容。(A) 獵戶被噬是襯托焦奇神勇，文中沒有說他有謀；(B) 詳寫擊貓是為了對比，不是主人恨貓；(D) 焦奇打虎是事實，不是杜撰。","data/114-ch.json#114-國文-21.png","data/114-ch.json#114-國文-g20.png"],"114-國文-22":["「函牛之鼎不可以烹小鮮，千斤之弩不可以中鼷鼠」是說大材不宜小用。(A)「不斫柱以為椽」是不把可做柱子的大木砍成小椽，意思最接近。(B) 開始努力後來懈怠；(C) 任人宰割；(D) 不拘泥、能隨世變通。","data/114-ch.json#114-國文-22.png","data/114-ch.json#114-國文-g20.png"],"114-國文-23":["「旦視而暮撫，已去而復顧。甚者爪其膚……搖其本……」由看、撫摸到反覆回看，再到抓樹皮、搖樹根，行為層層加深，屬遞進寫法。(A) 職務說明；(B) 比較；(C) 推論，都不是遞進。","data/114-ch.json#114-國文-23.png","data/114-ch.json#114-國文-g20.png"],"114-國文-24":["鄭道傳與權近都師承大儒李穡，權近著有《五經淺見錄》，可知十四世紀末已有韓國士大夫在李穡引領下接受儒家思想。(A) 金九容只在舟中遙望岳陽樓；(B) 諺文創造前士大夫皆讀漢文，文中無姜弘重不能讀的根據；(D) 士大夫都能讀寫漢文。","data/114-ch.json#114-國文-24.png","data/114-ch.json#114-國文-g24.png"],"114-國文-25":["① 姜弘重說洞庭岳陽景致絕勝，以它為標準衡量草津湖景，視岳陽樓為勝景代表；② 鄭道傳引范仲淹「先天下之憂而憂」，說「我思古人，實獲我心」，視范仲淹為理想人格。","data/114-ch.json#114-國文-25.png","data/114-ch.json#114-國文-g24.png"],"114-國文-26":["① 〈詠月〉說小時只會背誦「似鏡如鉤」，中年才懂得「躍金沉璧」（〈岳陽樓記〉月景）的真樂，是領悟而非感傷，錯誤。② 〈對菊有感〉說面對東籬菊花感到羞愧，以「偽淵明」自稱，表示身在田園卻不能像陶淵明那樣悠然，正確。","data/114-ch.json#114-國文-26.png","data/114-ch.json#114-國文-g24.png"],"114-國文-27":["權近稱讚友人憂樂都在及於他人，「推其憂於息波」即把對眾人的關懷推及渡口的風波，心繫群眾。(A)「東歸」指回到東方的故國；(B)「二樂」指仁者樂山、智者樂水；(D) 姜弘重惋惜的是草津湖景位在日本「蠻邦」，無文人品題，並非自慚。","data/114-ch.json#114-國文-27.png","data/114-ch.json#114-國文-g24.png"],"114-國文-28":["依文章，鮪延繩釣船遍布三大洋，圍網漁船在太平洋溫暖的低緯度海域作業，圖中位於太平洋低緯度的 ② 符合兩者作業區。① 位於西北太平洋，應是秋刀魚作業區；③ 不是魷秋漁船作業區；④ 不符合「原路返臺」經南非、新加坡的航向。","data/114-ch.json#114-國文-28.png","data/114-ch.json#114-國文-g28.png"],"114-國文-29":["魷魚與秋刀魚都有趨光性，魷秋漁船掌握此習性調整漁具漁法，又能在船上分級冷凍，比日本近海小船的漁獲更新鮮。(A) 延繩釣船遍布三大洋，不是離臺灣近；(B) 文中沒有十年的說法，也未說多數改裝；(D) 減船計畫是為永續，不再追求產量成長。","data/114-ch.json#114-國文-29.png","data/114-ch.json#114-國文-g28.png"],"114-國文-30":["本題選明顯不適當的。乙表只有臺灣自己的秋刀魚產量，沒有其他國家的數據，無法佐證「全球第一」。(A) 甲圖可比較三種漁業產量；(B) 圍網船只有 28 艘，產量卻與 948 艘延繩釣船相近；(C) 延繩釣產量約 14～18 萬公噸，平均約 15 萬公噸。","data/114-ch.json#114-國文-30.png","data/114-ch.json#114-國文-g28.png"],"114-國文-31":["羅芳伯臨終時，眾人說「按規矩，總廳大哥須是嘉應州人」，可見推選首長注重故鄉地域。(A) 張阿財是被收編後掌理財務，不是共同創辦；(B) 當時荷蘭東印度公司尚未插足西婆羅洲；(C) 坤甸早有潮州人公司。","data/114-ch.json#114-國文-31.png","data/114-ch.json#114-國文-g31.png"],"114-國文-32":["蘭芳以武力兼併茅恩、明黃等公司擴張；大港、三條溝等公司則組成「和順聯盟」。(B) 公司沿用中國村社體制；(C) 蘭芳後來接受荷蘭授予的職銜而妥協；(D) 大港、蘭芳都是被荷蘭以武力消滅。","data/114-ch.json#114-國文-32.png","data/114-ch.json#114-國文-g31.png"],"114-國文-33":["主張是共和國者，以總廳大哥須經「擇賢而立」的推舉程序（②）為例；反對者認為這些公司仍不脫地緣與宗族的村社本質，以總廳大哥須是嘉應州人的籍貫限制（①）為例。③ 是荷蘭授予的職銜，代表獨立性漸失，與是否民主無關。","data/114-ch.json#114-國文-33.png","data/114-ch.json#114-國文-g31.png"],"114-國文-34":["「大唐總長」「蘭芳紀元」出自 1912 年《坤甸歷史》與 1961 年羅香林的著作，而 1856 年的《蘭芳公司歷代年冊》對此隻字未提。文章採信年代較早、作者與末代甲太關係密切的年冊，理由是較接近當時事實。","data/114-ch.json#114-國文-34.png","data/114-ch.json#114-國文-g31.png"],"114-國文-35":["① 羅芳伯在坤甸、東萬律一帶貿易；② 他得到投靠的客家人擁戴；④ 他率眾平定騷亂的土著，即壓制達雅人。③「商賈」指商人，不是荷蘭東印度公司；⑤「客長」是華人與土著對他的尊稱，「蘭芳大總制甲太」是 1824 年荷蘭授予劉台二的職銜。","data/114-ch.json#114-國文-35.png","data/114-ch.json#114-國文-g31.png"],"114-國文-36":["全日物流擁有 13 座冷鏈物流中心、420 輛低溫車，能頻繁配送、覆蓋廣，堪稱臺灣冷鏈龍頭。(B) 全日是幫拉亞採購配送產地蔬果，不是自製冷凍品；(C) 蔬果保鮮要求高、配送複雜，成本並不低；(D) 統一、全聯是自行建立冷鏈，轉為競爭對手。","data/114-ch.json#114-國文-36.png","data/114-ch.json#114-國文-g36.png"],"114-國文-37":["全日在原本的配送（最後一哩路）之外，加入「第一哩路」：在採收前後與農戶合作，如協助防治鳳梨害蟲（田間管理），並與蔬果裁切包裝業者合作（裁切包裝）。物流管理與配送是原本的業務。","data/114-ch.json#114-國文-37.png","data/114-ch.json#114-國文-g36.png"],"114-國文-38":["文章以「最後一哩路」代表原本的配送優勢，再延伸到產地端的「第一哩路」，說明全日如何藉原有優勢建構完整的蔬果冷鏈。(A) 13 座中心、420 輛車是原本的規模，不是迎戰的新作法；(B) Farmind 是學習對象；(D) 鳳梨只是進入日本通路，全日並未成為零售巨頭。","data/114-ch.json#114-國文-38.png","data/114-ch.json#114-國文-g36.png"],"114-英文-01":["句意：孩子用彩色粉筆在白紙上「畫」圖。draw pictures 畫圖。heat 加熱；mail 郵寄；type 打字。","data/114-en.json#114-英文-01.png",null],"114-英文-02":["句意：房間太「擁擠」，連放新椅子的空間都找不到。crowded 擁擠的。available 可用的；empty 空的（與後句矛盾）；positive 正面的。","data/114-en.json#114-英文-02.png",null],"114-英文-03":["句意：許多人爬過玉山主「峰」，那是臺灣的最高點。main peak 主峰。base 底部；shore 岸邊；valley 山谷。","data/114-en.json#114-英文-03.png",null],"114-英文-04":["句意：看了牆上爺爺的「肖像」，John 發現自己和爺爺長得很像。portrait 肖像。cattle 牛；jewelry 珠寶；whistle 哨子。","data/114-en.json#114-英文-04.png",null],"114-英文-05":["句意：在雨林中碰觸植物有風險，因為有些植物對人「有毒」。poisonous 有毒的。fashionable 時髦的；jealous 嫉妒的；reasonable 合理的。","data/114-en.json#114-英文-05.png",null],"114-英文-06":["句意：政府有「權力」處罰酒駕的人。have the authority to 有權做……。bargain 便宜貨；courtesy 禮貌；infection 感染。","data/114-en.json#114-英文-06.png",null],"114-英文-07":["句意：夜間有人經過時，公園的感應燈會「自動」亮起。by themselves 呼應 automatically 自動地。organically 有機地；productively 有成效地；selfishly 自私地。","data/114-en.json#114-英文-07.png",null],"114-英文-08":["句意：陳傑憲因表現出色，「脫穎而出成為」2024 世界棒球 12 強賽 MVP。stand out as 脫穎而出成為。be named after 以……命名；make fun of 取笑；be in charge of 負責。","data/114-en.json#114-英文-08.png",null],"114-英文-09":["畫線字 Apparently 意為「顯然地」，與 obviously 同義。句意：Mary 又自我介紹一次，顯然她以為我忘了她的名字。actively 積極地；entirely 完全地；internally 內部地。","data/114-en.json#114-英文-09.png",null],"114-英文-10":["畫線字 abandon 意為「放棄、拋棄」，與 give up 同義。句意：姊姊決定拋棄舊習慣，開始人生新篇章。bring about 導致；carry on 繼續；run into 偶遇。","data/114-en.json#114-英文-10.png",null],"114-英文-11":["爸爸提醒手機用太多會傷眼，兒子回答「那我應該少用一點」，爸爸才接著建議去慢跑。(B)(C)(D) 都與勸少用手機的脈絡不合。","data/114-en.json#114-英文-11.png",null],"114-英文-12":["Lucy 同意要少用塑膠，接著說「所以我總是帶自己的水壺」，John 說好主意，他也要試試。(A)(B)(D) 都是增加塑膠或浪費的行為。","data/114-en.json#114-英文-12.png",null],"114-英文-13":["小販回答「當然！我們每天早上直接從農場進貨，是最好的」，可知顧客問的是「蛋新鮮嗎？」。","data/114-en.json#114-英文-13.png",null],"114-英文-14":["Ken 提議插隊，July 說「不行」，並責問「你怎麼會想這樣做？」，Ken 才同意排到隊伍後面。","data/114-en.json#114-英文-14.png",null],"114-英文-15":["Nancy 舉例「西裝或看起來專業的正式服裝」，可知她先說的是「你要穿著得體」。","data/114-en.json#114-英文-15.png",null],"114-英文-16":["Anna 回答「沒錯！所以羽球在臺灣越來越受歡迎」，可知 Terry 說的是「我想他們的成功激勵了很多人」。(A)(B)(C) 都無法引出羽球更受歡迎的結論。","data/114-en.json#114-英文-16.png",null],"114-英文-17":["媽媽說「沒錯，因為我工作一整天，眼睛快睜不開了」，可知兒子說的是「也許妳看起來很累」。","data/114-en.json#114-英文-17.png",null],"114-英文-18":["Liu 太太回答「藍綠色、絲質的，很貴」，描述的是外觀，所以房務人員問「您的圍巾長什麼樣子？」。","data/114-en.json#114-英文-18.png",null],"114-英文-19":["Johnson 回答「你們專注於現代藝術，符合我的背景與興趣」，說明的是應徵動機，所以 Ms. Lee 問「你為什麼想在我的畫廊工作？」。","data/114-en.json#114-英文-19.png",null],"114-英文-20":["Paul 回答「是科學家戴維，他做出第一盞電燈」，可知 Jack 問的是「那最早是誰發明的？」(Then who came up with it first?)。","data/114-en.json#114-英文-20.png",null],"114-英文-21":["列舉 60 多種技能類別「例如」機器人、木工、冷凍空調。such as 例如。compared with 與……相比；except for 除了；rather than 而不是。","data/114-en.json#114-英文-21.png","data/114-en.json#114-英文-g21.png"],"114-英文-22":["被動語態 be encouraged by 某人，表示「受到父親的鼓勵」。分詞構句 Encouraged by his father 省略主詞 Tsai。","data/114-en.json#114-英文-22.png","data/114-en.json#114-英文-g21.png"],"114-英文-23":["Chen joined... and completed the course，與前面過去式 joined 對等連接，用過去式 completed：「在多數人退訓時完成了六個月課程」。","data/114-en.json#114-英文-23.png","data/114-en.json#114-英文-g21.png"],"114-英文-24":["兩位得主是「做中學」的例子，透過直接經驗與長期「持續練習」培養技能，呼應蔡昀融每天練 12 小時。constant practice 持續練習。","data/114-en.json#114-英文-24.png","data/114-en.json#114-英文-g21.png"],"114-英文-25":["前句說大眾以為電子菸無害，後句說事實上電子菸含尼古丁會上癮、傷肺，語意轉折，用 However 然而。Therefore 因此；At last 最後；By chance 偶然。","data/114-en.json#114-英文-25.png","data/114-en.json#114-英文-g25.png"],"114-英文-26":["「少至」一茶匙的液態尼古丁就能致死，強調量很少。as little as 少到只有（修飾不可數的量）。as many as 多達（可數）。","data/114-en.json#114-英文-26.png","data/114-en.json#114-英文-g25.png"],"114-英文-27":["主詞 the number（數量）是單數，in the past five years 表從過去持續到現在，用現在完成式 has doubled「已增加一倍」。","data/114-en.json#114-英文-27.png","data/114-en.json#114-英文-g25.png"],"114-英文-28":["前文說青少年使用電子菸越來越多，「為了遏止此增長趨勢」，政府自 2023 年起禁止電子菸。To stop this rise 為了阻止此增加。","data/114-en.json#114-英文-28.png","data/114-en.json#114-英文-g25.png"],"114-英文-29":["海報介紹六位傑出的女性科學家（化學、數學、天文、物理），最佳標題是「女性的力量」。(B) 只有 Hopper 在二戰服役；(C) 只有兩位得諾貝爾獎；(D) 不全是化學家。","data/114-en.json#114-英文-29.png","data/114-en.json#114-英文-g29.png"],"114-英文-30":["本題選「不正確」的。吳健雄是從中國來到美國（came to the United States from China），不是在美國出生。(A)(B)(C) 都與海報內容相符。","data/114-en.json#114-英文-30.png","data/114-en.json#114-英文-g29.png"],"114-英文-31":["本題選「不正確」的。Betty 已經使用月費 699 元、無限上網的方案，並不是要升級為 20 GB。想考慮升級 20 GB 的是 Dave。(A)(B)(C) 與對話及表格相符。","data/114-en.json#114-英文-31.png","data/114-en.json#114-英文-g31.png"],"114-英文-32":["Dave 最後說「我要換成一樣的方案」，即 Betty 的每月 699 元無限上網，對應表中的 Plan C。","data/114-en.json#114-英文-32.png","data/114-en.json#114-英文-g31.png"],"114-英文-33":["2023 年颱風：5 月 MAWAR、7 月 DOKSURI、8 月 KHANUN 與 SAOLA、9 月 HAIKUI、10 月 KOINU。8 月有 2 個，最多。","data/114-en.json#114-英文-33.png","data/114-en.json#114-英文-g33.png"],"114-英文-34":["三年共 14 個颱風，其中中度颱風（Moderate Intensity）有 8 個，最多。(A) 2021 年有 5 個；(B) 2022 年只有 3 個，比 2021 年少；(C) LUPIT 是 2021 年。","data/114-en.json#114-英文-34.png","data/114-en.json#114-英文-g33.png"],"114-英文-35":["依表統計：2021 年 5 個、2022 年 3 個、2023 年 6 個，只有選項 (D) 的圖表數字與之相符。","data/114-en.json#114-英文-35.png","data/114-en.json#114-英文-g33.png"],"114-英文-36":["文章說明超級電腦在全球（病毒研究、癌症、風力發電）與臺灣（養豬、氣象、生技醫藥）的應用與影響，主旨是超級電腦的用途與影響。(B) 文中沒有談缺點；(A)(D) 範圍太窄。","data/114-en.json#114-英文-36.png","data/114-en.json#114-英文-g36.png"],"114-英文-37":["It analyzed and compared samples...，前一句主詞是 a supercomputer（超級電腦協助科學家分離辨識棘蛋白），It 指這台超級電腦。","data/114-en.json#114-英文-37.png","data/114-en.json#114-英文-g36.png"],"114-英文-38":["本題選第三段「沒有」提到的。提升風力發電效率出現在第二段。第三段提到臺灣 AI 雲幫助選豬（提升牲畜品質）、氣象局超級電腦提高預報準確度、國衛院超級電腦促進全民健康。","data/114-en.json#114-英文-38.png","data/114-en.json#114-英文-g36.png"],"114-英文-39":["文章介紹臺灣蘭花產業的出口地位、發展歷程、因應競爭的策略，以及 2024 年世界蘭花會議與保育，主題是臺灣蘭花產業的介紹。(B)(C)(D) 只是部分內容。","data/114-en.json#114-英文-39.png","data/114-en.json#114-英文-g39.png"],"114-英文-40":["第三段先說會議主題是蘭花科技與保育，再指出原生種逐漸消失，產業體認生態保護與經濟成長須並行，並推動志工復育計畫，重點是產業成長與物種保育的平衡。","data/114-en.json#114-英文-40.png","data/114-en.json#114-英文-g39.png"],"114-英文-41":["文中說「Growers mix different native species to develop a new variety」，業者混合原生種培育新品種。(A) 蝴蝶蘭是出口大宗，不是進口；(C) 臺灣才有全球最集中的蘭花溫室產業；(D) 志工是把原生種「種回」野外。","data/114-en.json#114-英文-41.png","data/114-en.json#114-英文-g39.png"],"114-英文-42":["依時間：2007 年失去全球花卉市場龍頭（b）→ 2018 年蝴蝶蘭種苗出口 80 多國（c）→ 2023 年蘭花出口達新臺幣 70 億元（a）→ 2024 年首度主辦世界蘭花會議（d）。","data/114-en.json#114-英文-42.png","data/114-en.json#114-英文-g39.png"],"115-國文-01":["(C)「春帷不揩」的「揩」（擦拭）與文意不合，是錯字。錯別字題多為同音或形近誤用，「揩」與「開」同音，「春帷不開，窗扉緊掩」語意通順、前後相對，應作「開」。(A) 弊竇：舞弊的漏洞；(B) 莊稼、品茗；(D) 朦朧、沸騰，都正確。","data/115-ch.json#115-國文-01.png",null],"115-國文-02":["① 愀然的「然」是形容詞詞尾，意為「……的樣子」；② 何為其然的「然」是代詞「如此」。(A) 儼然（整齊的樣子）、默然（沉默的樣子）都同 ①。(B) 騞然同 ①，「然鄭亡」的然是「然而」；(C) 蕭然同 ①，「然臺煤」的然是「然而」；(D)「不然」同 ②，「充然」同 ①。","data/115-ch.json#115-國文-02.png",null],"115-國文-03":["天尊說子牙「生來命薄」，只能享人間之福，表示修仙不成，填「仙道難成」；下山的任務是助周伐商、「身為將相」，填「扶助明主」。「盛情難卻」與文意無關；「功高震主」是負面結果，不合天尊的期許。","data/115-ch.json#115-國文-03.png",null],"115-國文-04":["例句「長者為榱，短者為梲」依同一基準（長短）分成兩類，各有用途。(D)「鑑窪則照人面大，凸則照人面小」依鏡面形狀分為凹、凸兩類，呈現不同效果。(A) 是同一事物的判斷；(B)「節有間、刀無厚」是兩種不同事物的對比；(C) 是並列描寫。","data/115-ch.json#115-國文-04.png",null],"115-國文-05":["資料顯示「取締」「接觸」都未見於清代以前的經史子集，最早見於 19 世紀日本文獻，因此無法追溯到 18 世紀以前的古代詞義。(A) 兩詞都是日本新造詞，與「交通」的古詞新義不同；(C)(D) 資料沒有提供新造詞數量或作者態度的證據。","data/115-ch.json#115-國文-05.png",null],"115-國文-06":["圖中依時代排列韓愈、柳宗元的生年，再列宋代歐陽修、王安石、黃仲元對「韓、柳」的評論，說明後人如何比較、並稱兩人，主題是「韓、柳並稱」如何形成。圖中沒有兩人交往、駢文態度或八大家作品的內容。","data/115-ch.json#115-國文-06.png",null],"115-國文-07":["例句視線由整體（屈原）聚焦到局部（面容）。(C)〈桃花源記〉由「林盡水源」到「一山」，再到「山有小口」，視線由大而小、逐步聚焦。(A) 寫登樓的心境；(B) 寫物產交流；(D) 寫宴飲之樂，都不是由整體到局部的觀看。","data/115-ch.json#115-國文-07.png",null],"115-國文-08":["文惠君由庖丁「順著牛的肌理運刀」聯想到「順應自然以養生」；問者由郭橐駝「順木之天」聯想到「治民也應順其本性」。兩人都是由兩件事的相似道理聯想而得，皆屬 II 相似聯想。","data/115-ch.json#115-國文-08.png",null],"115-國文-09":["先說作品的創新：② 強調布偶眼神 → ⑤ 並以流行音樂取代鑼鼓（「並」承接 ②）→ ① 這些創新手法圈粉無數（總結前兩項）→ ④ 男女老幼著迷史豔文 → ③ 電視臺因此增加播出集數，接末句收視率高達 97%。","data/115-ch.json#115-國文-09.png",null],"115-國文-10":["范五老詩中「橫槊」用曹操橫槊賦詩的典故，「說武侯」指諸葛亮（武鄉侯）。詩句表達功名未竟、羞於聽人談論諸葛亮的建樹，因此是關於曹操與諸葛亮的典故。","data/115-ch.json#115-國文-10.png",null],"115-國文-11":["甲文家屬依醫師建議把彌留的粉娘接回家，子女陸續趕回；乙文子女陪父親坐救護車回家，「留著一口氣，回到家裡」。二文都呈現子女遵守長者在家離世、親人隨侍在側的傳統。(A) 曾孫未回是由母親以年幼為由，不是炎坤同意；(B)(C) 文中沒有這樣的敘述。","data/115-ch.json#115-國文-11.png","data/115-ch.json#115-國文-g11.png"],"115-國文-12":["甲文寫粉娘被送回家後，炎坤通知親戚、親屬返家的情形；乙文主要寫搭救護車送父親回家途中的見聞。(A) 甲文說「不到兩個禮拜」又送醫，不是住院兩週；(B) 甲文沒有寫救護車上醫護的作為；(D) 二文沒有親屬商議治喪的細節。","data/115-ch.json#115-國文-12.png","data/115-ch.json#115-國文-g11.png"],"115-國文-13":["④ 男護士問死亡時間「好不好」，家屬內心百感交集，卻只能說好，表達無可奈何、聽天由命。(A) ① 是說病情已無法挽回；(B) ② 支吾是親屬不便回來又不好直說；(C) ③「無醫」呼應父親的冷笑話，指已無法醫治、送回家。","data/115-ch.json#115-國文-13.png","data/115-ch.json#115-國文-g11.png"],"115-國文-14":["本題選不適當的。乙文全由「我」敘述，只採第一人稱觀點，沒有兼採兩種觀點。(A) 甲文敘述者在故事外；(C) 能說出親戚心中的想法，是全知觀點；(D)「難道哈利路亞？」是「我」的猜測，受限於個人見聞。","data/115-ch.json#115-國文-14.png","data/115-ch.json#115-國文-g11.png"],"115-國文-15":["甲文親戚問「會不會和上一次一樣？」暗示不想白跑一趟，諷刺親情淡薄；乙文一再說「名義上說」，留一口氣回家、子女送最後一程都只是形式，諷刺喪葬習俗徒具儀式。","data/115-ch.json#115-國文-15.png","data/115-ch.json#115-國文-g11.png"],"115-國文-16":["探春是趙姨娘所生的庶女，當家時強調「豈能逾矩」「依禮行事」，希望在王夫人託付下有所表現，不被人說閒話。(B) 她沒有主張廢除喪葬補助；(C) 她拒絕了生母的要求；(D) 她沒有辭去當家的打算。","data/115-ch.json#115-國文-16.png","data/115-ch.json#115-國文-g16.png"],"115-國文-17":["趙姨娘舉襲人、鴛鴦母親都給了四十兩，說明府中有破例的先例，要求探春對自己的兄弟也彈性處理。(A)(B)(D) 都不是她的用意。","data/115-ch.json#115-國文-17.png","data/115-ch.json#115-國文-g16.png"],"115-國文-18":["對「親人應多照顧親人」，探春回應「哪有個行端理正的，要人拉拔」，即人人按禮守分，何須格外照顧（②）；對「我沒面子你也沒面子」，探春回應若因此做不好被撤換，「非但我失了臉面，哪個又有光彩」，即當家犯錯才會讓大家沒面子（④）。","data/115-ch.json#115-國文-18.png","data/115-ch.json#115-國文-g16.png"],"115-國文-19":["依右圖，鄭國匠人學成後技能足以勝任，但遇上大旱、大雨，市場已不需要，屬「專用技能足以勝任、市場需求低」（②）；他改學新技能，是希望轉到「技能足以勝任、市場需求高」（①）。","data/115-ch.json#115-國文-19.png",null],"115-國文-20":["白圭「人棄我取，人取我與」，在穀類豐收價低時收購，等市面缺貨再賣，屬逆向操作。最符合的箴言是「市場氣氛低迷時，潛在的漲幅更可觀」。其他選項與逆勢操作的經驗無關。","data/115-ch.json#115-國文-20.png",null],"115-國文-21":["蔡理事說明農民與匠人都只能依「上一期」的資訊決定下一步，等到成果出來時市場已變，強調當下難以預知未來，不宜事後以結果苛責鄭國匠人，即勿用後見之明。","data/115-ch.json#115-國文-21.png",null],"115-國文-22":["鄭國匠人三次學成新技藝，展現能把計畫做出成果的執行力（②）與不斷學習新知的能力（④），這些是可轉移到任何職業的技能。文中沒有他帶領他人、與人溝通或優化流程的事證。","data/115-ch.json#115-國文-22.png",null],"115-國文-23":["研究團隊分析古菱齒象成年與幼象的牙齒，得知其以 C4 植物為食、5～6 歲前喝母乳，並由氧同位素推知有大規模淡水河系。(A) 丹尼索瓦人化石還來自西伯利亞、青藏高原、哈爾濱；(B) 沒有推得體型；(C) 丹尼索瓦人不是現代智人。","data/115-ch.json#115-國文-23.png","data/115-ch.json#115-國文-g23.png"],"115-國文-24":["丹尼索瓦人化石在西伯利亞、青藏高原、哈爾濱，以及低緯度的澎湖水道都有發現，分布緯度與環境差異大，因此推論其能適應多種環境。","data/115-ch.json#115-國文-24.png","data/115-ch.json#115-國文-g23.png"],"115-國文-25":["依文章：古菱齒象以大草原型的 C4 植物為食，幼象 5～6 歲前喝母乳，並長期取用古河系的淡水。因此草原、母象帶幼象到河邊喝水的畫面最符合。(A) 臺灣海峽當時是陸地，非結冰海面；(B) 是陸地，不需駕舟；(D) 溫帶潮濕森林是 C3 植物環境。","data/115-ch.json#115-國文-25.png","data/115-ch.json#115-國文-g23.png"],"115-國文-26":["① 澎湖原人提取不到 DNA，改用古蛋白質體學確認為丹尼索瓦人，正確；② 碳同位素推知食物來源、氧同位素推知飲用淡水，正確。","data/115-ch.json#115-國文-26.png","data/115-ch.json#115-國文-g23.png"],"115-國文-27":["木刻魚子的針從魚口鉤入，「自然指南」，魚口（頭）指南，尾端甲指北；鐵魚「其首常南向午」，魚頭乙指南。故甲、乙依序為北、南。","data/115-ch.json#115-國文-27.png","data/115-ch.json#115-國文-g27.png"],"115-國文-28":["依《事林廣記》，指南魚腹中「陷好磁石」並用針從口中鉤入，指南龜「一如前法製造」再於尾邊敲針入去，兩者都內嵌磁石並使用磁針。(A) 只有指南魚提到如姆指大；(C) 兩者都被視為幻術；(D) 指南魚是放在水中。","data/115-ch.json#115-國文-28.png","data/115-ch.json#115-國文-g27.png"],"115-國文-29":["文中各家觀點分別認為：淬火時對準南北、鐵鉗的熱剩磁、密器中的磁石，才是鐵魚磁化的關鍵，共同討論的是燒紅、冷卻、收入密器等步驟中哪一項使鐵片磁化。","data/115-ch.json#115-國文-29.png","data/115-ch.json#115-國文-g27.png"],"115-國文-30":["① 子位（北）與午位（南）連線是南北向的線，與赤道垂直而非平行，錯誤；② 古人雖「莫可原其理」，不明白地磁原理，但已能用磁石磨針、淬火等方法使物體帶磁，正確。","data/115-ch.json#115-國文-30.png","data/115-ch.json#115-國文-g27.png"],"115-國文-31":["甲的第一點是「建立偏鄉及離島無人機物資運補機制」的時程：2024 年完成概念驗證及服務驗證，2025 年完成商業驗證。圖（一）主題填 ①，2024 年填 ④，2025 年填 ③。","data/115-ch.json#115-國文-31.png","data/115-ch.json#115-國文-g31.png"],"115-國文-32":["乙的兩點先談以無人機解決偏鄉物流最後一哩路，再談飛行場域擴大後的無限可能，最適合的標題是「從偏鄉物流起步，飛向無人機的未來」。(A)(B)(D) 都只呼應部分內容或與內容不符。","data/115-ch.json#115-國文-32.png","data/115-ch.json#115-國文-g31.png"],"115-國文-33":["翔隆航太提供勘災測量與三維建模，擎壤科技改良小型農噴機並提供飛手訓練，兩者都是以創新服務開拓無人機市場，但一個在防災救災、一個在農業，商用領域不同。文中未提機器產地，也未說是青年創業。","data/115-ch.json#115-國文-33.png","data/115-ch.json#115-國文-g31.png"],"115-國文-34":["丙的第二點說「最專業的翔隆團隊身為無人機產業領航者……歡迎查詢本公司官網」，是公司自我宣傳的告示口吻，與報導者立場不符，最應修改。","data/115-ch.json#115-國文-34.png","data/115-ch.json#115-國文-g31.png"],"115-國文-35":["依表（一），《鬼滅之刃》2016 年發行，4 年 7 個月破億，約在 2021 年銷售量已超過一億冊。(A) 表中沒有逐年銷量；(C) 表列的是累積銷量；(D)《航海王》破億花了 7 年 5 個月，不是五年內。","data/115-ch.json#115-國文-35.png","data/115-ch.json#115-國文-g35.png"],"115-國文-36":["特許廳主張圖案只是傳統市松紋，本身不具特殊性；集英社則強調外框等設計使圖案有別於一般花紋。雙方爭論的都是圖案「本身」是否具特殊性，即先天識別性（①），都未以銷售量等市場資料主張後天識別性。","data/115-ch.json#115-國文-36.png","data/115-ch.json#115-國文-g35.png"],"115-國文-37":["文中指出大正時期禁止一般人帶刀，滅鬼成員佩刀隱密行事，影射明治維新廢除武士階層，並表達對武士精神的追懷。可知滅鬼成員不是武士，卻延續武士精神。(A)(B)(C) 文中都沒有相關敘述。","data/115-ch.json#115-國文-37.png","data/115-ch.json#115-國文-g35.png"],"115-國文-38":["文中說大正時期的風潮是「本土西洋混搭」。仿巴洛克式的西洋立面上保留傳統匾額框，正是本土與西洋混搭。(B) 純英式教堂；(C)(D) 純傳統中式建築，都不是混搭。","data/115-ch.json#115-國文-38.png","data/115-ch.json#115-國文-g35.png"],"115-英文-01":["句意：衣服還是「濕的」，所以要晾在太陽下去除水分。wet 濕的。bare 赤裸的；dry 乾的（與後句矛盾）；thin 薄的。","data/115-en.json#115-英文-01.png",null],"115-英文-02":["句意：王冠閎三年級「加入」學校游泳隊，開始游泳之路。join 加入。block 阻擋；pull 拉；rent 租。","data/115-en.json#115-英文-02.png",null],"115-英文-03":["句意：老師「平等地」對待所有學生，給每個學生相同的成功機會。equally 平等地，與後句 the same opportunity 呼應。carelessly 粗心地；instantly 立即；silently 安靜地。","data/115-en.json#115-英文-03.png",null],"115-英文-04":["句意：步行可達平靜美麗的海灘，這間飯店是「適合」放鬆的地方。suitable 適合的。difficult 困難的；fearful 可怕的；rocky 多岩石的。","data/115-en.json#115-英文-04.png",null],"115-英文-05":["句意：為了「吸引」更多顧客，烘焙咖啡館連續三天咖啡打八折。attract 吸引。blame 責怪；excuse 原諒；prevent 防止。","data/115-en.json#115-英文-05.png",null],"115-英文-06":["句意：一兩天內的天氣預報相當「準確」，大多數時候都提供正確資訊。accurate 準確的，呼應 correct。doubtful 可疑的；false 錯誤的；inferior 較差的。","data/115-en.json#115-英文-06.png",null],"115-英文-07":["句意：Amy 量了「體溫」後，確定自己發高燒。body temperature 體溫。existence 存在；image 形象；structure 結構。","data/115-en.json#115-英文-07.png",null],"115-英文-08":["句意：頒獎人舒淇「宣布」最佳導演得主時，觀眾起立鼓掌。announce 宣布。circulate 流傳；inspect 檢查；preserve 保存。","data/115-en.json#115-英文-08.png",null],"115-英文-09":["畫線字 option 意為「選擇、選項」，與 choice 同義。句意：想省錢的人會買二手車，因為那是較負擔得起的選擇。material 材料；quantity 數量；sample 樣品。","data/115-en.json#115-英文-09.png",null],"115-英文-10":["畫線字 extremely 意為「極度地」，與 deeply（深深地）意義最接近。句意：Tim 被布農族八部合音深深感動。angrily 生氣地；bravely 勇敢地；openly 公開地。","data/115-en.json#115-英文-10.png",null],"115-英文-11":["店員說完價錢後問「還需要別的嗎？」（Anything else?），顧客回答「不用，只要充電器」。(A) Is that all? 回答應是 Yes；(C) 問付款方式，不能答「只要充電器」；(D) 與回答無關。","data/115-en.json#115-英文-11.png",null],"115-英文-12":["Jane 回應「你真幸運！你買到票了！」，可知 Tom 說的是「我和同學一起去了」。(A)(C)(D) 都無法引出「你買到票了」的回應。","data/115-en.json#115-英文-12.png",null],"115-英文-13":["Liz 回答「橘子象徵好運」，說明的是原因，所以 Jay 問的是「為什麼是橘子？」(Why mandarin oranges?)。","data/115-en.json#115-英文-13.png",null],"115-英文-14":["Brian 提到「你已經 30 歲了」，Lily 回答「年齡不是問題」，可知 Brian 問「學新語言不會太晚嗎？」。","data/115-en.json#115-英文-14.png",null],"115-英文-15":["Rose 接著解釋塑膠中的化學物質可能溶入水中，對健康不好，可知 Peter 問的是「那有什麼問題？」(What's wrong with that?)。","data/115-en.json#115-英文-15.png",null],"115-英文-16":["冰箱沒有食物，Mr. Wu 又要開會，便提議「那今晚出去吃吧」，Mrs. Wu 才說「你去訂餐廳，我去接 Jimmy」。","data/115-en.json#115-英文-16.png",null],"115-英文-17":["Ming 回答「總共 22 面，我們贏得團體冠軍」，可知 A-Mei 問的是「我們有得到金牌嗎？」。","data/115-en.json#115-英文-17.png",null],"115-英文-18":["Ben 回答「是的，把過去的工作從最近的往回列」，可知 Ann 問「接下來是我的工作經歷嗎？」(My work experience?)。","data/115-en.json#115-英文-18.png",null],"115-英文-19":["奶奶說自己很健康、換照沒問題，接著說「我確定能換到新駕照」；Dave 也同意，相信還能搭奶奶的車。(A)(B) 與「沒問題」矛盾；(D) 奶奶已經 71 歲。","data/115-en.json#115-英文-19.png",null],"115-英文-20":["Willy 說「所以現在我們更了解黑猩猩在野外的行為」，可知前一句是「她真的幫助人們了解這些動物」。珍古德研究的是黑猩猩，不是海洋、兒童或流浪貓。","data/115-en.json#115-英文-20.png",null],"115-英文-21":["Among the 260 women seafarers「在這 260 位女性航海人員之中」，許多人證明航海是值得的職業。among 在……之中。during 在……期間；near 靠近；opposite 在對面。","data/115-en.json#115-英文-21.png","data/115-en.json#115-英文-g21.png"],"115-英文-22":["引水人要在大浪中爬上移動的船，需要冒險，是一份「艱難的」工作。tough 艱難的。domestic 國內的；remote 遙遠的；simple 簡單的。","data/115-en.json#115-英文-22.png","data/115-en.json#115-英文-g21.png"],"115-英文-23":["林嘉玲要確保石油可靠地送達各港口，「即使」天氣惡劣也一樣。even when 即使在……時候。just where 正在……地方；or else 否則；so that 以便。","data/115-en.json#115-英文-23.png","data/115-en.json#115-英文-g21.png"],"115-英文-24":["航運業努力打造性別友善的職場，「以改善女性就業」，後文說女船長人數增加，證明努力有成果。(A)(D) 增加障礙與挑戰，方向相反；(B) 與性別友善無關。","data/115-en.json#115-英文-24.png","data/115-en.json#115-英文-g21.png"],"115-英文-25":["淡江大橋讓淡水與八里間通勤節省半小時，除了使「交通流動」順暢外，還能吸引遊客。traffic flow 車流。","data/115-en.json#115-英文-25.png","data/115-en.json#115-英文-g25.png"],"115-英文-26":["the first bridge in Taiwan (that was) selected through an international design competition，用過去分詞 selected 表被動，修飾 bridge：「第一座經國際競圖選出的橋」。","data/115-en.json#115-英文-26.png","data/115-en.json#115-英文-g25.png"],"115-英文-27":["橋塔高聳入天，「彷彿」舞者雙手高舉祈禱。as if 好像，後接假設語氣 were。in case 以防；in order that 以便；as long as 只要。","data/115-en.json#115-英文-27.png","data/115-en.json#115-英文-g25.png"],"115-英文-28":["前句說縮短淡水與八里的交通時間，又有獨特美景，因此大橋將在「交通與觀光」兩方面扮演重要角色，後句也說帶來交通便利與休閒效益。","data/115-en.json#115-英文-28.png","data/115-en.json#115-英文-g25.png"],"115-英文-29":["Elsa 部落格的三則貼文：和爸媽看電影、阿姨來訪、和媽媽吃義大利麵，都是家庭生活。她只說之後會連結影評，並未貼出菜單或學校活動。","data/115-en.json#115-英文-29.png","data/115-en.json#115-英文-g29.png"],"115-英文-30":["4 月 2 日貼文說她找到有趣的影評，讀完後「會加上這些部落格的連結」(Will add links to these blogs)，所以接下來最可能連結影評部落格。(D) 她說絕不公開地址等個人資料。","data/115-en.json#115-英文-30.png","data/115-en.json#115-英文-g29.png"],"115-英文-31":["依折線圖，煤與煤製品自 2004 年起一直維持約 30% 的能源供應。(A) 天然氣逐年增加；(B) 核能在 10% 以下並逐漸下降；(D) 石油與石油製品從約 52% 降到 43%。","data/115-en.json#115-英文-31.png","data/115-en.json#115-英文-g31.png"],"115-英文-32":["文章說太陽能的挑戰是：需要昂貴、儲量有限的電池儲能系統，以及需要大量空間。(A)(B)(C) 中的房價提升、能源來源、降低電費都是優點，不是挑戰。","data/115-en.json#115-英文-32.png","data/115-en.json#115-英文-g31.png"],"115-英文-33":["Mastro's 每店營收 1450 萬美元，高於 Nobu 的 1010 萬美元。(A) Cheesecake Factory 為 1240 萬，不是鼎泰豐 2740 萬的一半；(C) Nobu 1010 萬低於 Del Frisco's 1380 萬；(D) Smith and Wollensky 比鼎泰豐少。","data/115-en.json#115-英文-33.png","data/115-en.json#115-英文-g33.png"],"115-英文-34":["本題選「沒有」被提到作為成功原因的。180 家分店、13 國只是說明規模。文中說成功來自一致的產品品質（18 摺、21 克）、玻璃廚房的視覺效果，以及各分店一致的口味與服務。","data/115-en.json#115-英文-34.png","data/115-en.json#115-英文-g33.png"],"115-英文-35":["依序為：1958 年在臺灣開設食用油行（c）→ 1972 年開始賣小籠包（a）→ 約 25 年後在洛杉磯開設第一家美國分店（b）→ 2025 年報告中每店營收全美第一（d）。","data/115-en.json#115-英文-35.png","data/115-en.json#115-英文-g33.png"],"115-英文-36":["文章指出青少年焦慮的兩大原因：童年缺乏真實世界的自由（少戶外自由遊戲）、以手機取代遊戲。最適合的結論是針對這兩點提出建議：多面對面互動、學校提供更多自由遊戲的時間與空間。(A)(B)(C) 都鼓勵使用科技，與文意相反。","data/115-en.json#115-英文-36.png","data/115-en.json#115-英文-g36.png"],"115-英文-37":["文章說童年失去戶外遊戲與長時間使用手機，是青少年焦慮的主因。(A) 自由的戶外活動有益發展；(B) 問題是父母過度保護，不是缺乏引導；(C) 以手機為主的童年使人難以專注、與人疏離。","data/115-en.json#115-英文-37.png","data/115-en.json#115-英文-g36.png"],"115-英文-38":["文中說父母過度保護，孩子沒有機會探索、冒險、獨立解決問題，因此「可能錯過發展自信與獨立的機會」。(A)(B)(D) 都與文意相反。","data/115-en.json#115-英文-38.png","data/115-en.json#115-英文-g36.png"],"115-英文-39":["文章依序說明臺灣電子業從代工起家、成為電腦筆電龍頭、發展 EMS，到現在搭上 AI 浪潮，主旨是臺灣電子產業的發展進程。(A)(C)(D) 只是文中的局部內容。","data/115-en.json#115-英文-39.png","data/115-en.json#115-英文-g39.png"],"115-英文-40":["本題選「不是」重要原因的。文中說廠商重視高品質產品，「而不是以價格競爭」(rather than competing on price)。人才庫、政府政策、本地供應商網絡都是成功因素。","data/115-en.json#115-英文-40.png","data/115-en.json#115-英文-g39.png"],"115-英文-41":["ride the wave of change 字面是「乘著變化的浪潮」，意指把握新的變化、從中獲利，與 take advantage of the new change 最接近。","data/115-en.json#115-英文-41.png","data/115-en.json#115-英文-g39.png"],"115-英文-42":["文中說搭上潮流的廠商從 AI 伺服器賺得比 iPhone 多，AI 相關產品首次勝過消費性電子。(A) 是有四家臺灣廠商進入全球前十大 EMS；(B) 1990 年代臺灣是電腦與筆電生產龍頭；(D) 早期代工廠是依客戶的設計生產零件。","data/115-en.json#115-英文-42.png","data/115-en.json#115-英文-g39.png"]},"flags":{"115-國文-01":"Claude 依同音誤用研判「揩」應作「開」，原典未查到，請老師確認。"},"notes":{"C01":{"key":["每年第 1 題固定考錯別字，錯誤多為同音或形近字誤用。","歷年考過的正確寫法：闊綽、晦澀、低迷、大快朵頤、屏息、倏忽、功德無量。常見陷阱還有：佝僂、乾癟、怵惕、意興闌珊、舳艫相繼、蓊鬱、橫亙、倨傲、弊竇、品茗。","做法：逐一把詞語還原成成語或常用詞，再依字義檢查。例如「朵頤」的頤是下巴，「屏息」的屏是抑止。"],"trap":["選項常一句裡放兩個錯字（如「誨澀」「低彌」），看到一個錯字就可以確定答案。","形近字要從字義判斷，不要憑字形感覺。"]},"C02":{"key":["一字多義：考過「出」（超出、出現、出門、取出）、「復」（又、再）、「如」（往、像、比得上）、「類」（像、種類）、「極」（窮盡、很）、「則」（就、是）、「然」（……的樣子、如此、然而）、「於」（在、對）、「爾」（你）。","虛字「而」的用法：順承、因果、轉折（相當於「卻」，如「惑而不從師」）、修飾（如「提刀而立」）。","典故詞要知道出處，例如「肯綮」出自《莊子‧養生主》〈庖丁解牛〉，比喻要害。","做法：把題幹的字代入例句，換成白話後比較，意思能互換的就是同義。"],"trap":["「不用」可解作「不任用」或「不必」，要看上下文。","「敢」在書信中常是謙詞「冒昧」，不是「勇於」。"]},"C03":{"key":["成語與詞語填空：先讀懂整段的語意走向（正面或負面、轉折或承接），再看空格前後的關鍵字。","考過的詞語：相映成趣、不得垂青、自慚形穢、心曠神怡、東張西望、返璞歸真、層次分明、無聲勝有聲、街頭巷尾、互別苗頭、仙道難成、扶助明主。","虛詞填空（只是、也許、幾乎、竟是）要看語氣：「幾乎」表示接近、「竟是」表示出乎意料。"],"trap":["成語本身的對象要對：「過從甚密」用於人的往來，「前呼後擁」用於隨從眾多。","感情色彩要和文意相合，例如「功高震主」是負面的。"]},"C04":{"key":["修辭：轉化（擬人，如柳絲「伸入」「糾纏」）、譬喻（鵝蛋臉、虎狼之心）、借代（錦鱗代魚）、映襯與對比、設問（提問、激問、懸問）、遞進、層遞。","語法與病句：主語前後要一致（如尋犬啟事題）；詞語搭配要合理（如「全權」用錯）；主客角度不能顛倒（如「歸還」與「收回」）；一詞多義與斷句不同都會造成歧義。","表述方式題：先把例句的結構抽出來（如「整體→局部」「同一基準分成兩類」「一因多果」），再到選項找相同結構。","「把」字句：處置（主語有意識地做）與導致（非有意造成結果）。"],"trap":["比較句要看是否以「不同性質」的事物相比，人比人、髮比髮都屬同類相比。","反問句的答案就在問題裡，不是真的徵求答案。"]},"C05":{"key":["文句排序：先找開頭（承接題幹首句的主語或話題）和結尾（能接上題幹末句的那一句）。","利用連接詞成對：不僅……更、既……也、除……外、反觀、故、因此、並。","依時間、因果、由總而分、由例外到義務（契約條文）等邏輯排順序，排好後從頭讀一遍確認通順。"],"trap":["「並」「也」「卻」開頭的句子不會是第一句。"]},"C06":{"key":["必讀古文：〈漁父〉（與世推移、屈原寧赴湘流）、〈赤壁賦〉（變與不變的相對觀點）、〈燭之武退秦師〉、〈出師表〉、〈庖丁解牛〉、〈種樹郭橐駝傳〉（順木之天）、〈岳陽樓記〉（先天下之憂而憂）、〈桃花源記〉、〈蘭亭集序〉、〈鴻門宴〉。","作家與文學史：蘇軾豪放詞與李清照婉約詞的用字差異（豪放多寫江山、歷史、白髮，婉約多寫春、花、愁、相思）；韓、柳並稱；諸葛亮與曹操的典故。","考法常把課文放進圖表、量表或情境（交集圖、人生態度量表、衝突策略），要依課文中人物的言行判斷，不能憑印象。"],"trap":["〈赤壁賦〉是泛舟夜遊，不是登高題材。","「庶竭駑鈍」是諸葛亮自謙的誓言，不是勸後主。"]},"C07":{"key":["應用文：公文用語（主旨、說明、依據哪一份規定）、題辭（賀升遷「鶯遷喬木」、賀喬遷「德必有鄰」、賀開業「和氣致祥」、輓辭「典範長存」）、對聯（上聯末字仄聲、下聯末字平聲，詞性與意思要對仗）。","題辭要分清用於喜事還是喪事；對聯要看思想（儒家重孝悌與詩書，道家講無為、齊物）。"],"trap":["「典範長存」「駕返瑤池」是輓辭，不能用來祝賀。"]},"C08":{"key":["這是國文配分最重的章節之一：古文或文言題組，常兩篇甚至三篇對讀，例如筆記小說、史料、碑文、契約、日記、朝鮮漢文。","做法：先看題目再讀文章；每段用一句白話抓主旨；人物的言行與作者的評語分開標記。","常考題型：文意判斷（何者符合上文）、寫作手法（遞進、對比、以景寫情、不直接評論）、人物形象、比較兩文的共同觀點、詞義（如「爾」「故」「及」「益」）。","搭配圖表的題目（魚骨圖、雙氣泡圖、策略圖）要把文意對應到圖上的欄位，逐格檢查。"],"trap":["選項常偷換主語或對象，例如把 A 做的事說成 B 做的。","「可確知」只能選文章明確寫到的內容，推論過頭的選項不能選。"]},"C09":{"key":["白話文學題組（小說、散文、新詩，常甲乙兩文對讀）：考人物心理、敘事觀點、伏筆、諷刺、象徵、寫作手法。","考過的作品與作家：魯迅〈孔乙己〉（不可信賴的敘事者）、賴和（諷刺日治時期警察）、楚辭〈少司命〉、狄仁傑探案、送終題材的散文。","諷刺題先找作者的「線索詞」（如「名義上說」），再判斷諷刺的對象；敘事觀點要分清第一人稱與第三人稱、全知與限知。"],"trap":["人物的移動或細節描寫不一定有象徵意義，選項說它「暗示」什麼時要有文本根據。"]},"C10":{"key":["國文配分最重的章節：知識性與圖表閱讀，題材包括科普、產業、歷史資料、統計表、法規、廣告。","做法：圖表先看標題、單位、欄位定義（如出口總量和出口至某國總量的差別），再比對選項的數字與用語。","多文對讀時先找各文的立場，再判斷選項說的是「甲文」「乙文」還是「兩文皆」。","「何者錯誤」和「無法得知」的題目最常見：每個選項都要回原文找依據。"],"trap":["百分比的對象要看清楚（如「出口到美國占 40.6%」不等於美國市場占有率）。","選項常把相關、因果、時間先後混在一起，要分辨文中是否真的有因果關係。"]},"C99":{"key":["寫作測驗 24 分，近年多為一題知性一題情意，或一篇引導寫作。","先審題：圈出題目要求的關鍵詞與限制（文體、立場、是否要引用資料），開頭兩句就要扣題。","結構：開頭點題→二至三段具體事例或論點→結尾呼應並深化；每段一個重點。","知性題要有論點加例證；情意題要有具體情境、細節與感受的轉變。"],"trap":["離題或只寫大道理會大幅失分；也要注意字數與字跡。"]},"E01":{"key":["字彙題每年 10 題：句子中的空格要靠上下文線索判斷，例如因果（because、so that）、同義呼應（accurate 呼應 correct）、對比（but、although）。","近年也考畫線字的同義詞（Apparently = obviously、abandon = give up、option = choice）。","片語：stand out as、have the authority to、be named after、make fun of、give up、carry on、run into、bring about。","背單字時以高中常用 4000 字為主，名詞、形容詞、副詞的字尾一起記（-tion、-ous、-able、-ly）。"],"trap":["有些選項與後句矛盾（如 dry 對上「要晾在太陽下」），先刪掉。","副詞題要看它修飾的動作是否合理（如 by themselves 呼應 automatically）。"]},"E02":{"key":["對話題每年 10 題：從空格「下一句」的回答反推空格內容最有效。例如回答是原因就填 Why，回答是外觀就填 What does it look like?","生活情境常考購物、點餐、旅館、面試、健康、環保、運動新聞（臺灣選手）。","常見功能句：Anything else?、What's wrong with that?、Why don't we...?、Is it too late to...?、How come...?"],"trap":["Is that all? 的回答應是 Yes/No，答句是 No, just... 時要選 Anything else?","要讀到對話最後一句再決定，前後語氣必須一致。"]},"E03":{"key":["綜合測驗（克漏字）：文法與語意並考。","文法重點：時態（in the past five years 用現在完成式）、主詞與動詞一致（the number 為單數）、被動語態與分詞構句（Encouraged by...）、過去分詞修飾名詞（a bridge selected through...）、as if 加假設語氣、對等連接時態一致。","轉折連接詞：However、Therefore、such as、even when、so that、rather than；數量修飾：as little as（量少）、as many as（可數）。","語意題要看前後句的邏輯：轉折、因果、舉例或結論。"],"trap":["A number of 用複數、The number of 用單數。","選項文法都對時，要靠段落主旨挑語意相合的。"]},"E04":{"key":["閱讀測驗配分最重：先看題目，再讀文章找關鍵句。","題型：主旨（看首段與末段）、細節（回原文定位）、推論（文章暗示）、字義推測（由上下文）、指涉（it、they 指什麼）、圖表與廣告資訊題。","題材常與臺灣時事、科學、健康、環保、人物傳記有關，多讀英文新聞摘要可以增加熟悉度。","時間分配：每篇約 5～6 分鐘，生字不必全懂，抓段落主題句即可。"],"trap":["選項用原文的字卻改了意思（偷換主詞或程度詞，如 all、never、only），是最常見的陷阱。","推論題不能超出文章範圍。"]},"E99":{"key":["非選擇題 16～18 分：填充、句子重組、中譯英。","填充：看詞性與時態，拼字要正確，字首字母常有提示。","句子重組：先找主詞與動詞，再接受詞、介系詞片語、從屬子句，最後檢查標點與大小寫。","中譯英：先抓句型（主詞＋動詞＋受詞），時態與主詞動詞一致要對，用有把握的簡單字。"],"trap":["拼錯字或時態錯誤都會扣分，寫完要再檢查一次。"]}}};
+const YEARS = [110, 111, 112, 113, 114, 115];
+const SUBJ = [
+  { key: '國文', label: '國文' },
+  { key: '英文', label: '英文' },
+];
+// 115 學年度採計：w 依序為 國、英、數、專一、專二
+const SCHOOLS = [
+  { id: 'common', name: '國文、英文', full: '共同科目',
+    apply: { share: 100, w: [1, 1], quota: '', screen: '', other: '', formula: '', tie: '' },
+    dist: { w: [1, 1], quota: '' } },
+];
+
+const state = { schools: new Set(['common']), mode: 'dist', subj: '國文', chapter: null, showAll: false, query: '', pfilter: 'all', onlyFlag: false };
+// 國文、英文依題型或大題分類，單位比專業科目的章節大，混排會被大題型擠滿，因此清單預設只排專業科目
+const PFILTERS = [{ id: 'all', label: '兩科混排' }, ...SUBJ.map(s => ({ id: s.key, label: s.label }))];
+try {
+  const saved = JSON.parse(localStorage.getItem('tvee-common') || 'null');
+  if (saved) {
+    if (Array.isArray(saved.schools) && saved.schools.length) state.schools = new Set(saved.schools.filter(id => SCHOOLS.some(s => s.id === id)));
+    if (saved.mode === 'apply' || saved.mode === 'dist') state.mode = saved.mode;
+    if (SUBJ.some(s => s.key === saved.subj)) state.subj = saved.subj;
+  }
+  state.schools = new Set(['common']); state.mode = 'dist';
+} catch (e) {}
+function save() {
+  try { localStorage.setItem('tvee-common', JSON.stringify({ schools: [...state.schools], mode: state.mode, subj: state.subj })); } catch (e) {}
+}
+
+// ---- 章節統計 ----
+const CH = (() => {
+  const m = new Map();
+  for (const s of SUBJ) for (const [code, name] of Object.entries(D.chapters[s.key])) {
+    m.set(s.key + '|' + code, { subj: s.key, code, name, pts: Object.fromEntries(YEARS.map(y => [y, 0])), qs: [], fixed: false });
+  }
+  for (const q of D.questions) {
+    const c = m.get(q[2] + '|' + q[4]);
+    if (!c) continue;
+    c.pts[q[1]] += q[6];
+    c.qs.push(q);
+  }
+  for (const f of D.fixed) {
+    const c = m.get(f.subject + '|' + f.code);
+    for (const y of YEARS) c.pts[y] += f.pts[String(y)] || 0;
+    c.fixed = true;
+  }
+  for (const c of m.values()) {
+    const v = YEARS.map(y => c.pts[y]);
+    c.avg = v.reduce((a, b) => a + b, 0) / 6;
+    c.early = (v[0] + v[1] + v[2]) / 3;
+    c.late = (v[3] + v[4] + v[5]) / 3;
+    c.diff = c.late - c.early;
+    c.T = c.early > 0 ? Math.min(1.5, Math.max(0.5, c.late / c.early)) : (c.late > 0 ? 1.5 : 1);
+  }
+  return [...m.values()];
+})();
+
+function subjIndex(key) { return SUBJ.findIndex(s => s.key === key); }
+function subjLabel(key) { return SUBJ[subjIndex(key)].label; }
+
+// 各科占總成績的百分比；多校時取平均
+function weights() {
+  const sel = SCHOOLS.filter(s => state.schools.has(s.id));
+  const out = SUBJ.map(() => 0);
+  for (const s of sel) {
+    const cfg = s[state.mode];
+    const total = cfg.w.reduce((a, b) => a + b, 0);
+    const share = state.mode === 'apply' ? cfg.share : 100;
+    cfg.w.forEach((w, i) => { out[i] += share * w / total / sel.length; });
+  }
+  return out;
+}
+
+function trendHTML(c) {
+  const d = c.diff;
+  if (d >= 1) return `<span class="trend up" title="110–112 年平均 ${c.early.toFixed(1)} 分，113–115 年平均 ${c.late.toFixed(1)} 分">▲ ${d.toFixed(1)}</span>`;
+  if (d <= -1) return `<span class="trend down" title="110–112 年平均 ${c.early.toFixed(1)} 分，113–115 年平均 ${c.late.toFixed(1)} 分">▼ ${Math.abs(d).toFixed(1)}</span>`;
+  return `<span class="trend flat">持平</span>`;
+}
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+// ---- 控制列 ----
+function renderControls() {
+  const box = document.getElementById('schools');
+  box.innerHTML = SCHOOLS.map(s => `<button type="button" class="chip" id="school-${s.id}" data-id="${s.id}" aria-pressed="${state.schools.has(s.id)}" title="${esc(s.full)}">${esc(s.name)}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.id;
+    if (state.schools.has(id)) { if (state.schools.size > 1) state.schools.delete(id); }
+    else state.schools.add(id);
+    save(); renderAll();
+  }));
+  document.querySelectorAll('.seg button').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
+    b.onclick = () => { state.mode = b.dataset.mode; save(); renderAll(); };
+  });
+  document.getElementById('mode-hint').textContent = state.mode === 'apply'
+    ? '統測成績只占甄選總成績的一部分，其餘為備審、專題實作、面試等'
+    : '登記分發只看統測加權總分，五科全部採計';
+}
+
+// ---- 權重 ----
+function renderWeights() {
+  const W = weights();
+  const n = state.schools.size;
+  document.getElementById('weight-sub').textContent = (n > 1 ? `${n} 校平均。` : '') +
+    (state.mode === 'apply' ? '甄選總成績中，各科統測分數換算後的占比。' : '登記分發總成績中，各科的占比。');
+  const max = Math.max(...W, 1);
+  document.getElementById('wbars').innerHTML = SUBJ.map((s, i) => `
+    <div class="wbar${W[i] < 0.05 ? ' zero' : ''}">
+      <span>${esc(s.label)}</span>
+      <span class="track"><span class="fill" style="width:${(W[i] / max * 100).toFixed(1)}%"></span></span>
+      <span class="num">${W[i] < 0.05 ? '0' : W[i].toFixed(1)}%</span>
+    </div>`).join('');
+  const sel = SCHOOLS.filter(s => state.schools.has(s.id));
+  document.getElementById('school-notes').innerHTML = sel.map(s => state.mode === 'apply'
+    ? `<div class="sn"><b>${esc(s.full)}</b>　名額 <span class="num">${s.apply.quota}</span><br>第一階段篩選：${esc(s.apply.screen)}<br>統測占 <span class="num">${s.apply.share}%</span>，其餘：${esc(s.apply.other)}</div>`
+    : `<div class="sn"><b>${esc(s.full)}</b>　名額 <span class="num">${s.dist.quota}</span><br>權重 國 ${s.dist.w[0]}、英 ${s.dist.w[1]}、數 ${s.dist.w[2]}、專一 ${s.dist.w[3]}、專二 ${s.dist.w[4]}${s.dist.quota <= 3 ? '<br><span style="color:var(--card-red)">分發名額很少，建議以甄選為主要管道</span>' : ''}</div>`).join('');
+}
+
+// ---- 優先清單 ----
+function priorityList() {
+  const W = weights();
+  const inScope = c => state.pfilter === 'all' ? true : state.pfilter === 'pro' ? (c.subj === '專業一' || c.subj === '專業二') : c.subj === state.pfilter;
+  return CH.filter(inScope).map(c => {
+    const w = W[subjIndex(c.subj)];
+    return { c, share: c.avg * w / 100, score: c.avg * c.T * w / 100 };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+}
+
+function renderPriority() {
+  const W = weights();
+  const fbox = document.getElementById('prio-filter');
+  fbox.innerHTML = PFILTERS.map(f => `<button type="button" class="chip" id="pf-${f.id}" data-id="${f.id}" aria-pressed="${f.id === state.pfilter}">${esc(f.label)}</button>`).join('');
+  fbox.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { state.pfilter = b.dataset.id; state.showAll = false; renderPriority(); renderPracticeSetup(); }));
+  const warn = document.getElementById('prio-warn');
+  warn.hidden = true;
+  warn.textContent = '國文、英文以題型或大題為單位（如英文「閱讀測驗」每年 25 分），比專業科目的章節大得多，混排時會排在前面；比較時請以同一科為準。';
+  const list = priorityList();
+  const shown = state.showAll ? list : list.slice(0, 15);
+  const maxShare = Math.max(...list.map(x => x.share), 0.01);
+  const body = document.getElementById('prio');
+  if (!list.length) {
+    body.innerHTML = `<tr><td colspan="6" class="muted">${state.mode === 'apply' ? '甄選入學' : '登記分發'}時，目前選的學校不採計這一科。</td></tr>`;
+    document.getElementById('prio-more').hidden = true;
+    return;
+  }
+  body.innerHTML = shown.map((x, i) => `
+    <tr class="clickable" tabindex="0" data-subj="${esc(x.c.subj)}" data-code="${esc(x.c.code)}">
+      <td class="rank">${String(i + 1).padStart(2, '0')}</td>
+      <td><span class="subj">${esc(subjLabel(x.c.subj))}</span></td>
+      <td>${esc(x.c.name)}</td>
+      <td class="num">${x.c.avg.toFixed(1)} 分</td>
+      <td>${trendHTML(x.c)}</td>
+      <td><span class="share"><span class="bar" style="width:${(x.share / maxShare * 100).toFixed(1)}%"></span><span class="num">${x.share.toFixed(2)}%</span></span></td>
+    </tr>`).join('');
+  body.querySelectorAll('tr').forEach(tr => {
+    const go = () => { state.subj = tr.dataset.subj; state.chapter = tr.dataset.code; state.query = ''; save(); renderExplorer(); document.getElementById('explorer').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  const more = document.getElementById('prio-more');
+  more.hidden = list.length <= 15;
+  more.textContent = state.showAll ? '只顯示前 15 名' : `顯示全部 ${list.length} 項`;
+  more.onclick = () => { state.showAll = !state.showAll; renderPriority(); };
+}
+
+// ---- 各科熱度表 ----
+function renderExplorer() {
+  const tabs = document.getElementById('subj-tabs');
+  tabs.innerHTML = SUBJ.map(s => `<button type="button" role="tab" class="chip" id="tab-${s.key}" aria-pressed="${s.key === state.subj}" aria-selected="${s.key === state.subj}" data-key="${s.key}">${esc(s.label)}</button>`).join('');
+  tabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { state.subj = b.dataset.key; state.chapter = null; state.query = ''; save(); renderExplorer(); }));
+
+  const rows = CH.filter(c => c.subj === state.subj).sort((a, b) => b.avg - a.avg);
+  const qn = D.questions.filter(q => q[2] === state.subj);
+  const per = qn.length ? qn[0][6] : 2;
+  document.getElementById('subj-sub').textContent = {
+    '國文': '國文依題型分類（統測國文以閱讀題組為主，不按課次）。選擇題 38 題每題 2 分，另有寫作 24 分。',
+    '英文': '英文依試題本標示的大題分類。選擇題每題 2 分，另有非選擇題 16 分（110 年 18 分）。',
+    '數學': '數學C 依單元分類，每年 25 題、每題 4 分。',
+    '專業一': '專業科目(一) 生物(B)，依主題分類，每年 50 題、每題 2 分。',
+    '專業二': '專業科目(二) 健康與護理，依主題分類，每年 50 題、每題 2 分。',
+  }[state.subj] + ' 格子內為該年配分；點一列看題目。';
+
+  const max = Math.max(...rows.flatMap(c => YEARS.map(y => c.pts[y])), 1);
+  document.getElementById('hm-head').innerHTML = `<tr><th>章節／題型</th>${YEARS.map(y => `<th>${y}</th>`).join('')}<th style="text-align:right;padding-right:8px">平均</th><th style="text-align:right;padding-right:8px">近三年</th></tr>`;
+  const body = document.getElementById('hm-body');
+  body.innerHTML = rows.map(c => `
+    <tr tabindex="0" data-code="${esc(c.code)}" aria-selected="${c.code === state.chapter}">
+      <td class="cname">${esc(c.name)}</td>
+      ${YEARS.map(y => {
+        const v = c.pts[y], a = v / max;
+        const bg = v ? `background:color-mix(in srgb, var(--graphite) ${Math.round(12 + a * 78)}%, transparent);` : '';
+        const fg = a > 0.5 ? 'color:var(--on-graphite);' : (v ? '' : 'color:var(--muted);');
+        return `<td class="cell"><span style="${bg}${fg}" title="${y} 年 ${esc(c.name)}：${v} 分">${v || '·'}</span></td>`;
+      }).join('')}
+      <td class="avg">${c.avg.toFixed(1)}</td>
+      <td class="tr">${trendHTML(c)}</td>
+    </tr>`).join('');
+  body.querySelectorAll('tr').forEach(tr => {
+    const pick = () => { state.chapter = state.chapter === tr.dataset.code ? null : tr.dataset.code; state.query = ''; renderExplorer(); };
+    tr.addEventListener('click', pick);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+  });
+  document.getElementById('hm-legend').innerHTML = `每格為該年配分　<i style="background:color-mix(in srgb, var(--graphite) 14%, transparent)"></i><span>少</span><i style="background:color-mix(in srgb, var(--graphite) 52%, transparent)"></i><i style="background:var(--graphite)"></i><span>多（最高 ${max} 分）</span>`;
+  renderQuestions();
+  renderPracticeSetup();
+}
+
+function bubbles(ans) {
+  if (ans.includes('送分')) return '<span class="free">送分</span>';
+  return `<span class="bubbles" aria-label="答案 ${esc(ans)}">${['A', 'B', 'C', 'D'].map(l => `<b class="${ans.includes(l) ? 'on' : ''}">${l}</b>`).join('')}</span>`;
+}
+
+// 截圖依試卷打包，第一次展開該卷的題目時才下載
+const BUNDLES = {};
+function bundle(file) {
+  if (!BUNDLES[file]) BUNDLES[file] = fetch(file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(err => { delete BUNDLES[file]; throw err; });
+  return BUNDLES[file];
+}
+
+function notesHtml(c) {
+  const n = D.notes && D.notes[c.code];
+  if (!n) return '';
+  const li = xs => xs.map(t => `<li>${esc(t)}</li>`).join('');
+  return `<details class="notes" open><summary>本章重點筆記</summary><div class="nbody">
+    <h4>必讀重點</h4><ul>${li(n.key)}</ul>
+    ${n.trap && n.trap.length ? `<h4>常見陷阱</h4><ul class="trap">${li(n.trap)}</ul>` : ''}
+    <p class="muted" style="margin:8px 0 0;font-size:12px">由 Claude 依 110–115 年歷屆題目與解析整理，請搭配課本與任課老師的講義使用。</p></div></details>`;
+}
+
+function renderQuestions() {
+  const panel = document.getElementById('qpanel');
+  const c = CH.find(x => x.subj === state.subj && x.code === state.chapter);
+  if (!c) {
+    const top = CH.filter(x => x.subj === state.subj).sort((a, b) => b.avg - a.avg)[0];
+    panel.innerHTML = `<p class="muted" style="margin:0">點熱度表的任一列，這裡會列出該章節 110–115 年的所有題目與公告答案，點題目可展開截圖與解析。例如「${esc(top.name)}」六年共 ${top.qs.length || '固定配分'}${top.qs.length ? ' 題' : ''}。</p>`;
+    return;
+  }
+  if (c.fixed) {
+    panel.innerHTML = `<div class="qhead"><h3>${esc(c.name)}</h3></div>${notesHtml(c)}<p class="muted" style="margin:0">非選擇題，每年固定配分：${YEARS.map(y => `${y} 年 ${c.pts[y]} 分`).join('、')}。題目內容請見測驗中心公告的試題本。</p>`;
+    return;
+  }
+  panel.innerHTML = `<div class="qhead"><h3>${esc(c.name)}　<span class="muted mono" style="font-size:14px;font-weight:400">${c.qs.length} 題</span></h3>
+    <span class="row"><label class="qfilter"><input type="checkbox" id="qflag"${state.onlyFlag ? ' checked' : ''}>只看建議覆核（${c.qs.filter(x => D.flags[x[0]]).length}）</label>
+    <input type="search" id="qsearch" placeholder="搜尋題幹關鍵字" aria-label="搜尋題幹關鍵字" value="${esc(state.query)}"></span></div>
+    ${notesHtml(c)}<ul class="qlist" id="qlist"></ul>`;
+  const draw = () => {
+    const q = state.query.trim();
+    const items = c.qs.filter(x => (!q || x[7].includes(q)) && (!state.onlyFlag || D.flags[x[0]])).sort((a, b) => b[1] - a[1] || a[3] - b[3]);
+    document.getElementById('qlist').innerHTML = items.length
+      ? items.map(x => `<li><details data-id="${esc(x[0])}"><summary><span class="qid">${x[1]} 年 第 ${x[3]} 題</span>${bubbles(x[5])}<span class="stem">${esc(x[7])}…${D.flags[x[0]] ? '<span class="rv">建議覆核</span>' : ''}</span></summary><div class="qbody"></div></details></li>`).join('')
+      : `<li class="empty"><span class="muted">${q ? `沒有題幹含「${esc(q)}」的題目。` : '這個章節沒有建議覆核的題目。'}</span></li>`;
+    document.querySelectorAll('#qlist details').forEach(d => d.addEventListener('toggle', () => {
+      const body = d.querySelector('.qbody');
+      if (!d.open || body.childElementCount) return;
+      const e = D.ex[d.dataset.id];
+      if (!e) { body.innerHTML = '<p class="muted">此題尚無解析。</p>'; return; }
+      const [text, img, group] = e;
+      const ans = c.qs.find(x => x[0] === d.dataset.id)[5];
+      body.innerHTML = (group ? `<figure><figcaption>題組文章</figcaption><img data-ref="${esc(group)}" alt="題組共同文章截圖"></figure>` : '')
+        + `<figure><figcaption>題目截圖</figcaption><img data-ref="${esc(img)}" alt="${esc(d.dataset.id)} 題目截圖"><p class="muted img-wait" style="margin:4px 0 0;font-size:12px">截圖載入中…</p></figure>`
+        + `<div class="explain"><b>答案 ${esc(ans)}</b>　${esc(text)}</div>`
+        + (D.flags[d.dataset.id] ? `<p class="rvnote">建議優先覆核：${esc(D.flags[d.dataset.id])}</p>` : '');
+      body.querySelectorAll('img[data-ref]').forEach(im => {
+        const [file, name] = im.dataset.ref.split('#');
+        bundle(file).then(b => { im.src = b[name]; body.querySelector('.img-wait')?.remove(); })
+          .catch(() => { const w = body.querySelector('.img-wait'); if (w) w.textContent = '截圖載入失敗，請重新整理頁面。'; });
+      });
+    }));
+  };
+  draw();
+  document.getElementById('qsearch').addEventListener('input', e => { state.query = e.target.value; draw(); });
+  document.getElementById('qflag').addEventListener('change', e => { state.onlyFlag = e.target.checked; draw(); });
+}
+
+// ---- 練習模式 ----
+// 錯題本：每位使用者一份，存在本頁資料庫的個人區（別人看不到）；無法使用時存在這台裝置的瀏覽器。
+const book = { wrong: {}, ref: null, where: 'local' };
+try { const w = JSON.parse(localStorage.getItem('tvee-common-wrong') || 'null'); if (w && typeof w === 'object') book.wrong = w; } catch (e) {}
+let saving = Promise.resolve();
+function persistBook() {
+  try { localStorage.setItem('tvee-common-wrong', JSON.stringify(book.wrong)); } catch (e) {}
+  if (!book.ref) return;
+  const body = { wrong: { ...book.wrong }, updated: Date.now() };
+  saving = saving.then(() => book.ref.set(body)).catch(err => {
+    if (err && err.code === 'unavailable') return;
+    book.ref = null; book.where = 'local'; renderPracticeStatus();   // 沒有寫入權限：本次改存瀏覽器
+  });
+}
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+  const id = user ? await user.id() : null;
+  if (!db || !id) return;
+  try {
+    const ref = db.doc('data/users/' + id + '/practice');
+    const snap = await ref.get();
+    const remote = snap.exists ? (snap.data().wrong || {}) : {};
+    const merged = { ...remote };
+    for (const [k, v] of Object.entries(book.wrong)) merged[k] = Math.max(v, merged[k] || 0);
+    const changed = Object.keys(merged).some(k => merged[k] !== remote[k]);
+    book.wrong = merged; book.ref = ref; book.where = 'db';
+    if (changed) persistBook();
+    else { try { localStorage.setItem('tvee-common-wrong', JSON.stringify(book.wrong)); } catch (e) {} }
+  } catch (e) { /* 維持瀏覽器儲存 */ }
+  renderPracticeSetup();
+})();
+
+const P = { scope: 'prio', count: 10, run: null };
+const PSCOPES = [
+  { id: 'prio', label: '優先清單前 10 項' },
+  { id: 'chapter', label: '熱度表選的章節' },
+  { id: 'subj', label: '熱度表目前考科' },
+  { id: 'wrong', label: '錯題本' },
+];
+const QBY = new Map(D.questions.map(q => [q[0], q]));
+const playable = q => !q[5].includes('送分') && D.ex[q[0]];
+
+function practicePool() {
+  if (P.scope === 'paper') {
+    const { y, s } = P.paper;
+    return { qs: D.questions.filter(q => q[1] === y && q[2] === s && playable(q)).sort((a, b) => a[3] - b[3]), hint: `${y} 年 ${subjLabel(s)} 整份試卷，依題號順序作答` };
+  }
+  if (P.scope === 'prio') {
+    const top = priorityList().filter(x => !x.c.fixed).slice(0, 10);
+    return { qs: top.flatMap(x => x.c.qs).filter(playable), hint: top.length ? `目前優先清單（${PFILTERS.find(f => f.id === state.pfilter).label}）前 ${top.length} 項：${top.map(x => x.c.name).join('、')}` : '目前選的學校與清單範圍沒有可練習的章節。' };
+  }
+  if (P.scope === 'chapter') {
+    const c = CH.find(x => x.subj === state.subj && x.code === state.chapter);
+    if (!c || c.fixed) return { qs: [], hint: '先在上方熱度表點選一個章節。' };
+    return { qs: c.qs.filter(playable), hint: `${subjLabel(c.subj)}・${c.name}` };
+  }
+  if (P.scope === 'subj') return { qs: D.questions.filter(q => q[2] === state.subj && playable(q)), hint: `${subjLabel(state.subj)} 全部題目（在熱度表上方切換考科）` };
+  const ids = Object.keys(book.wrong).filter(id => QBY.has(id));
+  return { qs: ids.map(id => QBY.get(id)).filter(playable), hint: ids.length ? '錯題本裡的題目，答錯次數多的先出。' : '錯題本是空的，先練幾題吧。' };
+}
+
+function renderPracticeStatus() {
+  const el = document.getElementById('p-status');
+  if (!el) return;
+  el.textContent = `錯題本 ${Object.keys(book.wrong).length} 題・` + (book.where === 'db' ? '已存到你的帳號，換裝置也看得到，其他人看不到' : '存在這台裝置的瀏覽器');
+}
+
+function renderPracticeSetup() {
+  const sc = document.getElementById('p-scopes');
+  if (!sc) return;
+  sc.innerHTML = PSCOPES.map(x => `<button type="button" class="chip" data-id="${x.id}" aria-pressed="${x.id === P.scope}">${esc(x.label)}${x.id === 'wrong' ? `（${Object.keys(book.wrong).length}）` : ''}</button>`).join('');
+  sc.querySelectorAll('button').forEach(b => b.onclick = () => { P.scope = b.dataset.id; renderPracticeSetup(); });
+  const cc = document.getElementById('p-counts');
+  cc.innerHTML = [10, 20, 50].map(n => `<button type="button" class="chip" data-n="${n}" aria-pressed="${n === P.count}">${n} 題</button>`).join('');
+  cc.querySelectorAll('button').forEach(b => b.onclick = () => { P.count = +b.dataset.n; renderPracticeSetup(); });
+  const pool = practicePool();
+  document.getElementById('p-scope-hint').textContent = pool.hint + (pool.qs.length ? `（共 ${pool.qs.length} 題可出）` : '');
+  const start = document.getElementById('p-start');
+  start.disabled = !pool.qs.length;
+  start.onclick = startPractice;
+  renderPracticeStatus();
+}
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function startPractice() {
+  let qs = practicePool().qs.slice();
+  if (P.scope !== 'paper') qs = shuffle(qs);
+  if (P.scope === 'wrong') qs.sort((a, b) => (book.wrong[b[0]] || 0) - (book.wrong[a[0]] || 0));
+  P.run = { qs: P.scope === 'paper' ? qs : qs.slice(0, P.count), i: 0, right: 0, missed: [], answered: false };
+  document.getElementById('p-setup').hidden = true;
+  document.getElementById('p-run').hidden = false;
+  renderCard();
+  document.getElementById('practice').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setImg(im, ref) {
+  const [file, name] = ref.split('#');
+  bundle(file).then(b => { im.src = b[name]; }).catch(() => { im.alt = '截圖載入失敗，請重新整理頁面'; });
+}
+
+function renderCard() {
+  const R = P.run, box = document.getElementById('p-run');
+  if (R.i >= R.qs.length) return renderSummary(false);
+  const q = R.qs[R.i], [, img, group] = D.ex[q[0]];
+  R.answered = false;
+  box.innerHTML = `<div class="pcard">
+    <div class="pmeta"><span class="prog">第 ${R.i + 1} / ${R.qs.length} 題</span>
+      <span class="muted" style="font-size:13px">${q[1]} 年 ${esc(subjLabel(q[2]))} 第 ${q[3]} 題・${esc(D.chapters[q[2]][q[4]] || '')}</span>
+      <button type="button" class="linkbtn" id="p-quit">結束練習</button></div>
+    ${group ? '<details open><summary>題組文章</summary><img id="p-gimg" alt="題組共同文章截圖"></details>' : ''}
+    <figure><img id="p-img" alt="題目截圖"></figure>
+    <div class="pchoices" role="group" aria-label="選擇答案（可按鍵盤 A–D 或 1–4）">${['A', 'B', 'C', 'D'].map(l => `<button type="button" class="pchoice" data-l="${l}" aria-label="選 ${l}">${l}</button>`).join('')}</div>
+    <div id="p-after" hidden></div>
+  </div>`;
+  setImg(document.getElementById('p-img'), img);
+  if (group) setImg(document.getElementById('p-gimg'), group);
+  box.querySelectorAll('.pchoice').forEach(b => b.onclick = () => answer(b.dataset.l));
+  document.getElementById('p-quit').onclick = () => renderSummary(true);
+}
+
+function answer(l) {
+  const R = P.run;
+  if (R.answered) return;
+  R.answered = true;
+  const q = R.qs[R.i], ans = q[5], ok = ans.includes(l), [text] = D.ex[q[0]];
+  document.querySelectorAll('.pchoice').forEach(b => {
+    b.disabled = true;
+    if (ans.includes(b.dataset.l)) b.classList.add('correct');
+    else if (b.dataset.l === l) b.classList.add('picked');
+  });
+  if (ok) { R.right++; if (book.wrong[q[0]]) { delete book.wrong[q[0]]; persistBook(); } }
+  else { R.missed.push(q); book.wrong[q[0]] = (book.wrong[q[0]] || 0) + 1; persistBook(); }
+  const after = document.getElementById('p-after');
+  after.hidden = false;
+  const multi = ans.length > 1 ? `（公告 ${ans.split('').join('、')} 皆給分）` : '';
+  after.innerHTML = `<p class="pfeed ${ok ? 'ok' : 'bad'}" role="status">${ok ? '答對了' : `答錯了，正確答案是 ${esc(ans)}`}${esc(multi)}</p>
+    <div class="explain" style="margin-top:8px">${esc(text)}</div>
+    ${D.flags[q[0]] ? `<p class="rvnote" style="margin-top:8px">建議優先覆核：${esc(D.flags[q[0]])}</p>` : ''}
+    <div class="row" style="margin-top:12px"><button type="button" class="btn" id="p-next">${R.i + 1 < R.qs.length ? '下一題' : '看結果'}</button></div>`;
+  const next = document.getElementById('p-next');
+  next.onclick = () => { R.i++; renderCard(); document.getElementById('practice').scrollIntoView({ block: 'start' }); };
+  next.focus({ preventScroll: true });
+}
+
+function renderSummary(early) {
+  const R = P.run, done = R.i + (early && R.answered ? 1 : 0);
+  const box = document.getElementById('p-run');
+  const nWrong = Object.keys(book.wrong).length;
+  box.innerHTML = `<div class="pcard">
+    <h3>${early ? '練習結束' : '完成'}：答對 <span class="mono">${R.right} / ${done}</span> 題</h3>
+    ${R.missed.length ? `<p class="pstatus">這次答錯的題目已記進錯題本：</p><ol class="pwrong">${R.missed.map(q => `<li>${q[1]} 年 ${esc(subjLabel(q[2]))} 第 ${q[3]} 題（答案 ${esc(q[5])}）・${esc(D.chapters[q[2]][q[4]] || '')}</li>`).join('')}</ol>` : (done ? '<p class="pstatus">這次全部答對。</p>' : '')}
+    <div class="row">
+      <button type="button" class="btn" id="p-again">同範圍再練一次</button>
+      <button type="button" class="btn ghost" id="p-wrong" ${nWrong ? '' : 'disabled'}>練錯題本（${nWrong}）</button>
+      <button type="button" class="btn ghost" id="p-back">回到設定</button>
+    </div></div>`;
+  const back = () => { P.run = null; box.hidden = true; document.getElementById('p-setup').hidden = false; renderPracticeSetup(); };
+  document.getElementById('p-back').onclick = back;
+  document.getElementById('p-again').onclick = () => { back(); startPractice(); };
+  document.getElementById('p-wrong').onclick = () => { P.scope = 'wrong'; back(); startPractice(); };
+}
+
+document.addEventListener('keydown', e => {
+  if (!P.run || P.run.answered || (e.target.closest && e.target.closest('input, textarea')) || !document.querySelector('.pchoice')) return;
+  const k = e.key.toUpperCase();
+  const l = { A: 'A', B: 'B', C: 'C', D: 'D', 1: 'A', 2: 'B', 3: 'C', 4: 'D' }[k];
+  if (l && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); answer(l); }
+});
+
+document.getElementById('rv-count').textContent = Object.keys(D.flags).length;
+// ---- 讀書計畫 ----
+// 依目前選的目標校、入學管道排出每週進度：第一輪（依優先分數分配時數讀章節）→ 複習（錯題本、優先清單）→ 衝刺（整份歷屆試卷）。
+// 勾選紀錄與設定：每位使用者一份，存在本頁資料庫的個人區；無法使用時存在這台裝置的瀏覽器。
+const DAY = 86400000;
+function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function parseYmd(s) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+function mondayOf(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+const md = d => `${d.getMonth() + 1}/${d.getDate()}`;
+
+const plan = { done: {}, start: ymd(mondayOf(new Date())), exam: '2027-04-24', hours: 10, ref: null, where: 'local' };
+try {
+  const s = JSON.parse(localStorage.getItem('tvee-common-plan') || 'null');
+  if (s && typeof s === 'object') {
+    if (s.done && typeof s.done === 'object') plan.done = s.done;
+    if (parseYmd(s.start)) plan.start = s.start;
+    if (parseYmd(s.exam)) plan.exam = s.exam;
+    if ([6, 8, 10, 12, 15, 20].includes(s.hours)) plan.hours = s.hours;
+  }
+} catch (e) {}
+let planSaving = Promise.resolve(), planTimer = null;
+function planBody() { return { done: { ...plan.done }, start: plan.start, exam: plan.exam, hours: plan.hours, updated: Date.now() }; }
+function persistPlan() {
+  try { localStorage.setItem('tvee-common-plan', JSON.stringify(planBody())); } catch (e) {}
+  if (!plan.ref) return;
+  clearTimeout(planTimer);   // 連續勾選時合併成一次寫入
+  planTimer = setTimeout(() => {
+    const body = planBody();
+    planSaving = planSaving.then(() => plan.ref.set(body)).catch(err => {
+      if (err && err.code === 'unavailable') return;
+      plan.ref = null; plan.where = 'local'; renderPlan();
+    });
+  }, 600);
+}
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+  const id = user ? await user.id() : null;
+  if (!db || !id) return;
+  try {
+    const ref = db.doc('data/users/' + id + '/plan');
+    const snap = await ref.get();
+    if (snap.exists) {
+      const r = snap.data();
+      plan.done = { ...(r.done || {}), ...plan.done };
+      if (parseYmd(r.start)) plan.start = r.start;
+      if (parseYmd(r.exam)) plan.exam = r.exam;
+      if (r.hours) plan.hours = r.hours;
+    }
+    plan.ref = ref; plan.where = 'db';
+    if (!snap.exists ? Object.keys(plan.done).length : true) persistPlan();
+  } catch (e) { /* 維持瀏覽器儲存 */ }
+  renderPlan();
+})();
+
+function buildPlan() {
+  const start = mondayOf(parseYmd(plan.start) || new Date()), exam = parseYmd(plan.exam);
+  if (!exam || exam <= start) return { error: '統測日期需晚於開始日期。' };
+  const W = Math.ceil((exam - start) / DAY / 7);
+  if (W < 6) return { error: '距離統測不到 6 週，建議直接用「優先清單」與「錯題本」練習。' };
+  const S = Math.max(2, Math.round(W * 0.15)), R = Math.max(2, Math.round(W * 0.2)), L = W - S - R;
+  const H = plan.hours, Wt = weights();
+  const subjOn = SUBJ.filter((s, i) => Wt[i] >= 0.05).map(s => s.key);
+  // 第一輪：所有採計科目的章節，依「平均配分 × 趨勢 × 權重」分配時數，分數高的先讀
+  const items = CH.filter(c => subjOn.includes(c.subj)).map(c => ({ c, score: c.avg * c.T * Wt[subjIndex(c.subj)] })).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+  const total = items.reduce((a, x) => a + x.score, 0), budget = L * H;
+  const weeks = Array.from({ length: W }, (_, i) => ({ i, from: new Date(start.getTime() + i * 7 * DAY), phase: i < L ? 1 : i < L + R ? 2 : 3, tasks: [] }));
+  // 各科依優先分數排出章節佇列；每次挑「進度比例最落後」的科目讀約 2 小時，讓每週混合數科、各科同步推進
+  const queues = {};
+  for (const { c, score } of items) (queues[c.subj] = queues[c.subj] || []).push({ c, need: Math.max(1, Math.round(budget * score / total * 2) / 2), part: 0 });
+  const tot = {}, left0 = {};
+  for (const k in queues) tot[k] = left0[k] = queues[k].reduce((a, x) => a + x.need, 0);
+  for (let wi = 0; wi < L; wi++) {
+    let cap = H;
+    const byKey = new Map();
+    while (cap > 0.01) {
+      const ks = Object.keys(queues).filter(k => queues[k].length);
+      if (!ks.length) break;
+      ks.sort((a, b) => left0[b] / tot[b] - left0[a] / tot[a]);
+      const k = ks[0], it = queues[k][0], take = Math.min(2, it.need, cap);
+      const key = `L-${it.c.subj}-${it.c.code}-${it.part}`;
+      if (byKey.has(key)) byKey.get(key).hours += take;
+      else byKey.set(key, { key, it, hours: take, cont: it.part > 0 });
+      it.need -= take; left0[k] -= take; cap -= take;
+      if (it.need <= 0.01) queues[k].shift();
+    }
+    for (const t of byKey.values()) t.it.part++;
+    for (const { key, it, hours, cont } of byKey.values()) {
+      const c = it.c;
+      const sub = c.fixed ? (c.code === 'C99' ? '寫一篇限時作文並自評' : '練習填充、句子重組、中譯英各一回') : `讀重點後練本章歷屆題（${c.qs.length} 題）`;
+      weeks[wi].tasks.push({ key, text: `${subjLabel(c.subj)}・${c.name}${cont ? '（續）' : ''}`, sub: `約 ${hours} 小時：${sub}`, act: c.fixed ? null : { kind: 'chapter', subj: c.subj, code: c.code } });
+    }
+  }
+  // 複習：錯題本 + 優先清單
+  for (let i = L; i < L + R; i++) {
+    weeks[i].tasks.push({ key: `R-${i}-wrong`, text: '錯題本全部重做一次', sub: '答對的題目會自動移出錯題本', act: { kind: 'wrong' } });
+    weeks[i].tasks.push({ key: `R-${i}-prio`, text: '優先清單前 10 項隨機練 50 題', sub: '答錯的題目會記進錯題本', act: { kind: 'prio' } });
+    weeks[i].tasks.push({ key: `R-${i}-notes`, text: '整理本週錯題的觀念筆記', sub: '寫下答錯原因與正確觀念', act: null });
+  }
+  // 衝刺：由新到舊，每週一個年度的整份試卷
+  const years = [115, 114, 113, 112, 111, 110];
+  for (let i = L + R, k = 0; i < W; i++, k++) {
+    const y = years[k % years.length];
+    for (const s of SUBJ) if (subjOn.includes(s.key)) weeks[i].tasks.push({ key: `S-${y}-${s.key}`, text: `${y} 年 ${s.label} 整份試卷`, sub: '依考試時間計時作答，完成後檢討錯題', act: { kind: 'paper', y, subj: s.key } });
+  }
+  return { weeks, W, L, R, S, start, exam };
+}
+
+const PHASE = { 1: '第一輪・章節', 2: '複習', 3: '衝刺・整卷' };
+function renderPlan() {
+  const box = document.getElementById('plan-weeks');
+  if (!box) return;
+  document.getElementById('plan-start').value = plan.start;
+  document.getElementById('plan-exam').value = plan.exam;
+  document.getElementById('plan-hours').value = String(plan.hours);
+  const p = buildPlan();
+  const sum = document.getElementById('plan-summary');
+  if (p.error) { box.innerHTML = ''; sum.textContent = p.error; return; }
+  const all = p.weeks.flatMap(w => w.tasks), done = all.filter(t => plan.done[t.key]).length;
+  const sel = SCHOOLS.filter(s => state.schools.has(s.id)).map(s => s.name).join('、');
+  sum.innerHTML = `國文、英文，共 ${p.W} 週：第一輪 ${p.L} 週、複習 ${p.R} 週、衝刺 ${p.S} 週。已完成 <b class="mono">${done} / ${all.length}</b> 項。`;
+  document.getElementById('plan-bar').style.width = (all.length ? done / all.length * 100 : 0).toFixed(1) + '%';
+  document.getElementById('plan-where').textContent = plan.where === 'db' ? '進度已存到你的帳號，換裝置也看得到，其他人看不到' : '進度存在這台裝置的瀏覽器';
+  const today = new Date();
+  box.innerHTML = p.weeks.map(w => {
+    const to = new Date(w.from.getTime() + 6 * DAY), cur = today >= w.from && today < new Date(to.getTime() + DAY);
+    const d = w.tasks.filter(t => plan.done[t.key]).length;
+    return `<details class="pweek${cur ? ' cur' : ''}"${cur ? ' open' : ''}>
+      <summary><span class="mono">第 ${w.i + 1} 週</span><span class="muted">${md(w.from)}–${md(to)}</span><span class="ptag p${w.phase}">${PHASE[w.phase]}</span>${cur ? '<span class="ptag now">本週</span>' : ''}<span class="mono pcount">${d}/${w.tasks.length}</span></summary>
+      <ul class="ptasks">${w.tasks.map(t => `<li><label><input type="checkbox" data-key="${esc(t.key)}"${plan.done[t.key] ? ' checked' : ''}><span><b>${esc(t.text)}</b><br><span class="muted">${esc(t.sub)}</span></span></label>${t.act ? `<button type="button" class="linkbtn" data-act='${esc(JSON.stringify(t.act))}'>${t.act.kind === 'paper' ? '開始作答' : '去練習'}</button>` : ''}</li>`).join('')}</ul>
+    </details>`;
+  }).join('');
+  box.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => {
+    if (cb.checked) plan.done[cb.dataset.key] = 1; else delete plan.done[cb.dataset.key];
+    persistPlan(); renderPlan();
+  });
+  box.querySelectorAll('button[data-act]').forEach(b => b.onclick = () => planGo(JSON.parse(b.dataset.act)));
+}
+
+function planGo(a) {
+  if (a.kind === 'chapter') { state.subj = a.subj; state.chapter = a.code; state.query = ''; save(); renderExplorer(); P.scope = 'chapter'; P.count = 20; }
+  else if (a.kind === 'wrong') { P.scope = 'wrong'; P.count = 50; }
+  else if (a.kind === 'prio') { P.scope = 'prio'; P.count = 50; }
+  else if (a.kind === 'paper') { P.scope = 'paper'; P.paper = { y: a.y, s: a.subj }; }
+  P.run = null;
+  document.getElementById('p-run').hidden = true;
+  document.getElementById('p-setup').hidden = false;
+  renderPracticeSetup();
+  if (!practicePool().qs.length) { document.getElementById('practice').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  startPractice();
+}
+
+['plan-start', 'plan-exam'].forEach(id => document.getElementById(id).addEventListener('change', e => {
+  if (!parseYmd(e.target.value)) return;
+  plan[id === 'plan-start' ? 'start' : 'exam'] = e.target.value; persistPlan(); renderPlan();
+}));
+document.getElementById('plan-hours').addEventListener('change', e => { plan.hours = +e.target.value; persistPlan(); renderPlan(); });
+document.getElementById('plan-reset').addEventListener('click', () => {
+  if (!confirm('確定要清除所有已勾選的進度嗎？')) return;
+  plan.done = {}; persistPlan(); renderPlan();
+});
+
+function renderAll() { renderControls(); renderWeights(); renderPriority(); renderExplorer(); renderPracticeSetup(); renderPlan(); }
+renderAll();
+</script>
